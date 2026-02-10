@@ -1,0 +1,3650 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RFI Requirement System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Kanit', sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #667eea 0%, #4c63d2 25%, #3b5bdb 50%, #2948b1 75%, #1877f2 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 520px;
+      background: #ffffff;
+      border-radius: 20px;
+      padding: 40px 35px;
+      box-shadow: 0 20px 60px rgba(24, 119, 242, 0.3);
+      animation: fadeIn 0.5s ease-out;
+    }
+    
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    h1 {
+      text-align: center;
+      font-size: 32px;
+      font-weight: 600;
+      background: linear-gradient(135deg, #1877f2 0%, #2948b1 50%, #3b5bdb 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+    }
+    
+    .subtitle {
+      text-align: center;
+      font-size: 16px;
+      font-weight: 300;
+      color: #666;
+      margin-bottom: 30px;
+    }
+
+    /* ⭐ ปุ่ม Inspection Type */
+    .inspection-type-section {
+      margin-bottom: 20px;
+    }
+
+    .inspection-type-label {
+      display: block;
+      font-size: 15px;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 12px;
+      text-align: center;
+    }
+
+    .inspection-buttons {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .inspection-btn {
+      padding: 14px 20px;
+      border: 2px solid #e4e6eb;
+      background: rgba(255, 255, 255, 0.5);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      font-family: 'Kanit', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: #666;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .inspection-btn:hover {
+      border-color: #1877f2;
+      background: rgba(240, 247, 255, 0.8);
+      transform: translateY(-2px);
+    }
+
+    .inspection-btn.active {
+      border-color: #1877f2;
+      background: linear-gradient(135deg, #1877f2 0%, #2948b1 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(24, 119, 242, 0.3);
+    }
+
+    .inspection-btn.active.internal {
+      border-color: #f59e0b;
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+    }
+
+    .inspection-btn .icon {
+      font-size: 20px;
+    }
+
+    /* Info Box */
+    .info-box {
+      background: linear-gradient(135deg, #e7f3ff 0%, #d4e9ff 100%);
+      border-left: 4px solid #1877f2;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 25px;
+      font-size: 14px;
+      color: #1c4587;
+      display: none;
+    }
+
+    .info-box.show {
+      display: block;
+      animation: slideDown 0.3s ease-out;
+    }
+
+    .info-box.internal {
+      background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+      border-left-color: #f59e0b;
+      color: #92400e;
+    }
+
+    .info-box strong {
+      color: #1877f2;
+    }
+
+    .info-box.internal strong {
+      color: #f59e0b;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        max-height: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+      }
+      to {
+        opacity: 1;
+        max-height: 300px;
+        padding-top: 15px;
+        padding-bottom: 15px;
+      }
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: #333;
+      margin-bottom: 8px;
+    }
+    
+    label span {
+      color: #1877f2;
+    }
+    
+    input, select, textarea {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e4e6eb;
+      background: #ffffff;
+      border-radius: 10px;
+      font-family: 'Kanit', sans-serif;
+      font-size: 15px;
+      transition: all 0.3s ease;
+      color: #333;
+    }
+    
+    textarea {
+      height: 90px;
+      resize: vertical;
+    }
+    
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      background: white;
+      border-color: #1877f2;
+      box-shadow: 0 0 0 3px rgba(24, 119, 242, 0.1);
+    }
+    
+    input::placeholder, textarea::placeholder {
+      color: #999;
+      font-weight: 300;
+    }
+    
+    option {
+      color: #333;
+      font-weight: 400;
+    }
+    
+    input:disabled, select:disabled, textarea:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      background: #f5f6f7;
+    }
+    
+    .loading-select {
+      background-color: #f5f6f7 !important;
+      color: #666 !important;
+    }
+    
+    .team-category-section {
+      margin-bottom: 20px;
+    }
+    
+    .recommendation-box {
+      display: none;
+      background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+      border-left: 4px solid #10b981;
+      padding: 12px 15px;
+      border-radius: 10px;
+      margin-bottom: 12px;
+      font-size: 13px;
+      color: #065f46;
+      animation: slideDown 0.3s ease-out;
+    }
+    
+    .recommendation-box.show {
+      display: block;
+    }
+    
+    .recommendation-box strong {
+      color: #10b981;
+      font-weight: 600;
+    }
+    
+    .recommendation-box .team-info {
+      margin-top: 6px;
+      font-size: 12px;
+      color: #047857;
+      font-style: italic;
+    }
+    
+    .team-buttons {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    
+    .team-btn {
+      padding: 12px;
+      border: 2px solid #e4e6eb;
+      background: #ffffff;
+      border-radius: 10px;
+      font-family: 'Kanit', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      color: #666;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .team-btn:hover {
+      border-color: #1877f2;
+      background: #f0f7ff;
+      transform: translateY(-2px);
+    }
+    
+    .team-btn.active {
+      border-color: #1877f2;
+      background: linear-gradient(135deg, #1877f2 0%, #2948b1 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(24, 119, 242, 0.3);
+    }
+    
+    .team-btn.recommended {
+      border-color: #10b981;
+      background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+      position: relative;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    
+    .team-btn.recommended::before {
+      content: '\1F4A1';
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      font-size: 20px;
+      animation: bounce 1s ease-in-out infinite;
+    }
+    
+    .team-btn.recommended:hover {
+      border-color: #10b981;
+      background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+    }
+    
+    @keyframes pulse {
+      0%, 100% {
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+      }
+      50% {
+        box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+      }
+    }
+    
+    @keyframes bounce {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-5px);
+      }
+    }
+    
+    .team-btn .icon {
+      font-size: 18px;
+    }
+    
+    .multi-select-container {
+      display: none;
+      margin-top: 15px;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 10px;
+      border: 2px solid #e4e6eb;
+      animation: slideDown 0.3s ease-out;
+    }
+    
+    .multi-select-container.show {
+      display: block;
+    }
+    
+    .multi-select-title {
+      font-size: 14px;
+      font-weight: 500;
+      color: #1877f2;
+      margin-bottom: 10px;
+    }
+    
+    .checkbox-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 8px;
+      transition: background 0.2s;
+    }
+    
+    .checkbox-item:hover {
+      background: #e7f3ff;
+    }
+    
+    .checkbox-item input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: #1877f2;
+    }
+    
+    .checkbox-item label {
+      cursor: pointer;
+      margin: 0;
+      font-size: 14px;
+      color: #333;
+    }
+    
+    .checkbox-item .icon {
+      font-size: 16px;
+    }
+    
+    button {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, #1877f2 0%, #2948b1 50%, #3b5bdb 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Kanit', sans-serif;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 10px;
+      box-shadow: 0 4px 15px rgba(24, 119, 242, 0.3);
+    }
+    
+    button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(24, 119, 242, 0.4);
+    }
+    
+    button:active:not(:disabled) {
+      transform: translateY(0);
+    }
+    
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .loading {
+      display: none;
+      text-align: center;
+      margin-top: 20px;
+    }
+    
+    .spinner {
+      width: 40px;
+      height: 40px;
+      margin: 0 auto 10px;
+      border: 3px solid rgba(24, 119, 242, 0.2);
+      border-top-color: #1877f2;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .loading p {
+      color: #666;
+      font-weight: 300;
+    }
+    
+    .message {
+      padding: 12px 16px;
+      margin-top: 20px;
+      border-radius: 10px;
+      text-align: center;
+      display: none;
+      font-size: 14px;
+      animation: slideIn 0.3s ease-out;
+      white-space: pre-line;
+    }
+    
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    
+    .error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    
+    .info {
+      background: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+    
+    .warning {
+      background: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeaa7;
+    }
+    
+    .time-info {
+      font-size: 12px;
+      color: #1877f2;
+      margin-top: 5px;
+      font-style: italic;
+    }
+    
+    .footer-info {
+      text-align: center;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #e4e6eb;
+    }
+    
+    .footer-info p {
+      color: #666;
+      font-size: 14px;
+      margin: 5px 0;
+    }
+    
+    .footer-info .version {
+      color: #999;
+      font-size: 12px;
+    }
+    
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, #1877f2 0%, #2948b1 100%);
+      border-radius: 10px;
+    }
+
+    .calendar-link-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 14px 20px;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      border-radius: 12px;
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 500;
+      margin-bottom: 25px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.25);
+    }
+
+    .calendar-link-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.35);
+      background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    }
+
+    .calendar-link-btn .icon {
+      font-size: 20px;
+    }
+
+    .calendar-link-btn .external-icon {
+      font-size: 18px;
+      opacity: 0.8;
+    }
+
+    .manual-link-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 14px 20px;
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: white;
+      border-radius: 12px;
+      text-decoration: none;
+      font-size: 15px;
+      font-weight: 500;
+      margin-bottom: 25px;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.25);
+    }
+
+    .manual-link-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(245, 158, 11, 0.35);
+      background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+    }
+
+    .manual-link-btn .icon {
+      font-size: 20px;
+    }
+
+    .manual-link-btn .external-icon {
+      font-size: 18px;
+      opacity: 0.8;
+    }
+    
+    @media (max-width: 480px) {
+      .container {
+        padding: 30px 20px;
+      }
+      
+      h1 {
+        font-size: 26px;
+      }
+      
+      .subtitle {
+        font-size: 14px;
+      }
+      
+      .team-buttons {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  background: linear-gradient(135deg, #94a3b8 0%, #64748b 100%) !important;
+}
+
+input[type="file"] {
+  cursor: pointer;
+  font-size: 14px;
+}
+
+input[type="file"]:hover {
+  background: #e7f3ff !important;
+  border-color: #2948b1 !important;
+}
+
+input[type="file"]::file-selector-button {
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #1877f2 0%, #2948b1 100%);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: 'Kanit', sans-serif;
+  font-weight: 500;
+  margin-right: 10px;
+  transition: all 0.3s ease;
+}
+
+input[type="file"]::file-selector-button:hover {
+  background: linear-gradient(135deg, #2948b1 0%, #3b5bdb 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(24, 119, 242, 0.3);
+}
+
+/* ⭐ ปุ่มลบไฟล์ขนาดเล็ก - แค่ไอคอนถังขยะ */
+#clearFileBtn {
+  display: none;
+  padding: 0;
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 18px;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#clearFileBtn:hover {
+  background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+  transform: translateY(-1px) scale(1.05);
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+}
+
+#clearFileBtn:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* ⭐ Progress Bar in Submit Button */
+.submit-progress-container {
+  position: relative;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.submit-progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+  border-radius: 0 0 10px 10px;
+  transition: width 0.5s ease;
+  width: 0%;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.submit-step-text {
+  display: none;
+  text-align: center;
+  margin-top: 8px;
+  font-size: 13px;
+  color: #1877f2;
+  font-weight: 500;
+  animation: fadeIn 0.3s ease;
+}
+
+.submit-step-text.show {
+  display: block;
+}
+
+/* ⭐ Toast Notification System */
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 400px;
+}
+
+.toast {
+  background: white;
+  border-radius: 12px;
+  padding: 16px 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  animation: slideInRight 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  position: relative;
+  overflow: hidden;
+  min-width: 320px;
+}
+
+.toast::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+}
+
+.toast.success::before { background: #10b981; }
+.toast.error::before { background: #ef4444; }
+.toast.warning::before { background: #f59e0b; }
+.toast.info::before { background: #3b82f6; }
+
+.toast-icon {
+  font-size: 24px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+.toast-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.toast-title {
+  font-weight: 600;
+  font-size: 15px;
+  color: #1f2937;
+}
+
+.toast-message {
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+.toast-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  margin: 0;
+  line-height: 1;
+}
+
+.toast-close:hover {
+  background: #f3f4f6;
+  color: #374151;
+}
+
+.toast-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, rgba(16, 185, 129, 0.3) 0%, rgba(16, 185, 129, 0.8) 100%);
+  transition: width 0.1s linear;
+}
+
+.toast.success .toast-progress { background: linear-gradient(90deg, rgba(16, 185, 129, 0.3) 0%, rgba(16, 185, 129, 0.8) 100%); }
+.toast.error .toast-progress { background: linear-gradient(90deg, rgba(239, 68, 68, 0.3) 0%, rgba(239, 68, 68, 0.8) 100%); }
+.toast.warning .toast-progress { background: linear-gradient(90deg, rgba(245, 158, 11, 0.3) 0%, rgba(245, 158, 11, 0.8) 100%); }
+.toast.info .toast-progress { background: linear-gradient(90deg, rgba(59, 130, 246, 0.3) 0%, rgba(59, 130, 246, 0.8) 100%); }
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutRight {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .toast-container {
+    right: 10px;
+    left: 10px;
+    max-width: none;
+  }
+  
+  .toast {
+    min-width: auto;
+  }
+}
+
+.work-type-note {
+  margin-top: 12px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+  border-left: 4px solid #f59e0b;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #92400e;
+  line-height: 1.6;
+  animation: slideDown 0.3s ease-out;
+}
+
+.work-type-note strong {
+  color: #f59e0b;
+  font-weight: 600;
+}
+
+.work-type-note::before {
+  content: '📌 ';
+  font-size: 16px;
+  margin-right: 4px;
+}
+  /* Step Progress Indicator */
+    .progress-steps {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 40px;
+      position: relative;
+      padding: 0 20px;
+    }
+    
+    .progress-steps::before {
+      content: '';
+      position: absolute;
+      top: 20px;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: #e4e6eb;
+      z-index: 0;
+    }
+    
+    .progress-line {
+      position: absolute;
+      top: 20px;
+      left: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #1877f2 0%, #2948b1 100%);
+      transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      z-index: 1;
+    }
+    
+    .progress-step {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .progress-step.disabled {
+      cursor: not-allowed;
+      opacity: 0.4;
+    }
+    
+    .step-circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 3px solid #e4e6eb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      margin-bottom: 8px;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+    
+    .progress-step.active .step-circle {
+      background: linear-gradient(135deg, #1877f2 0%, #2948b1 100%);
+      border-color: #1877f2;
+      color: white;
+      transform: scale(1.1);
+      box-shadow: 0 4px 15px rgba(24, 119, 242, 0.4);
+    }
+    
+    .progress-step.completed .step-circle {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      border-color: #10b981;
+      color: white;
+    }
+    
+    .progress-step.completed .step-circle::after {
+      content: '✓';
+      font-size: 18px;
+      font-weight: bold;
+    }
+    
+    .step-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: #666;
+      text-align: center;
+      max-width: 80px;
+      line-height: 1.3;
+    }
+    
+    .progress-step.active .step-label {
+      color: #1877f2;
+      font-weight: 600;
+    }
+    
+    .progress-step.completed .step-label {
+      color: #10b981;
+    }
+    
+    /* Step Content */
+    .step-content {
+      display: none;
+      animation: fadeInUp 0.4s ease-out;
+    }
+    
+    .step-content.active {
+      display: block;
+    }
+    
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .step-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .step-title {
+      font-size: 24px;
+      font-weight: 600;
+      color: #1877f2;
+      margin-bottom: 8px;
+    }
+    
+    .step-subtitle {
+      font-size: 14px;
+      color: #666;
+      line-height: 1.5;
+    }
+    
+    /* Navigation Buttons */
+    .step-navigation {
+      display: flex;
+      gap: 12px;
+      margin-top: 30px;
+    }
+    
+    .btn-prev, .btn-next {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Kanit', sans-serif;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    .btn-prev {
+      background: #f0f2f5;
+      color: #666;
+    }
+    
+    .btn-prev:hover:not(:disabled) {
+      background: #e4e6eb;
+      transform: translateX(-2px);
+    }
+    
+    .btn-next {
+      background: linear-gradient(135deg, #1877f2 0%, #2948b1 100%);
+      color: white;
+      box-shadow: 0 4px 15px rgba(24, 119, 242, 0.3);
+    }
+    
+    .btn-next:hover:not(:disabled) {
+      transform: translateX(2px);
+      box-shadow: 0 6px 20px rgba(24, 119, 242, 0.4);
+    }
+    
+    .btn-prev:disabled,
+    .btn-next:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    
+
+<!-- ========================================
+     STEP 5: CONFIRMATION SUMMARY
+     ======================================== -->
+
+<!-- CSS Section -->
+<style>
+  /* Summary Card Container */
+  .summary-card {
+    background: #f9fafb;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  
+  /* Summary Section (แต่ละหมวด) */
+  .summary-section {
+    margin-bottom: 20px;
+  }
+  
+  .summary-section:last-child {
+    margin-bottom: 0;
+  }
+  
+  /* Summary Section Title */
+  .summary-section-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1877f2;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  /* Summary Item Row */
+  .summary-item {
+    display: flex;
+    padding: 10px 0;
+    border-bottom: 1px solid #e5e7eb;
+  }
+  
+  .summary-item:last-child {
+    border-bottom: none;
+  }
+  
+  /* Summary Label (ชื่อฟิลด์) */
+  .summary-label {
+    font-size: 14px;
+    color: #6b7280;
+    min-width: 140px;
+    font-weight: 500;
+  }
+  
+  /* Summary Value (ค่าข้อมูล) */
+  .summary-value {
+    font-size: 14px;
+    color: #1f2937;
+    font-weight: 400;
+    flex: 1;
+  }
+  
+  /* Highlight Important Values */
+  .summary-value.highlight {
+    color: #1877f2;
+    font-weight: 600;
+  }
+  
+  /* Edit Link */
+  .edit-link {
+    color: #3b82f6;
+    font-size: 13px;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+    margin-left: auto;
+  }
+  
+  .edit-link:hover {
+    color: #2563eb;
+    text-decoration: underline;
+  }
+  
+  /* Description Item (แสดงแบบ column) */
+  .summary-item.description-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .summary-item.description-item .summary-label {
+    margin-bottom: 8px;
+  }
+  
+  /* Description Display Box */
+  .summary-value[id="summaryDescription"] {
+    max-height: 150px;
+    overflow-y: auto;
+    font-size: 14px;
+    color: #444;
+    background: #ffffff;
+    padding: 12px 16px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    line-height: 1.6;
+    width: 100%;
+  }
+  
+  /* Custom Scrollbar for Description */
+  .summary-value[id="summaryDescription"]::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .summary-value[id="summaryDescription"]::-webkit-scrollbar-track {
+    background: #f3f4f6;
+    border-radius: 4px;
+  }
+  
+  .summary-value[id="summaryDescription"]::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #1877f2 0%, #2948b1 100%);
+    border-radius: 4px;
+  }
+  
+  .summary-value[id="summaryDescription"]::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #2948b1 0%, #3b5bdb 100%);
+  }
+  
+  /* Submit Button Container */
+  .submit-progress-container {
+    position: relative;
+    width: 100%;
+    margin-top: 10px;
+  }
+  
+  /* Submit Button */
+  .submit-progress-container button[type="submit"] {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 20px;
+    width: 100%;
+    background: linear-gradient(135deg, #1877f2 0%, #2948b1 50%, #3b5bdb 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Kanit', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(24, 119, 242, 0.3);
+  }
+  
+  .submit-progress-container button[type="submit"]:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(24, 119, 242, 0.4);
+  }
+  
+  .submit-progress-container button[type="submit"]:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+  
+  .submit-progress-container button[type="submit"] span:first-child {
+    font-size: 18px;
+  }
+  
+  /* Submit Progress Bar */
+  .submit-progress-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+    border-radius: 0 0 10px 10px;
+    transition: width 0.5s ease;
+    width: 0%;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+  }
+  
+  /* Submit Step Text */
+  .submit-step-text {
+    display: none;
+    text-align: center;
+    margin-top: 8px;
+    font-size: 13px;
+    color: #1877f2;
+    font-weight: 500;
+    animation: fadeIn 0.3s ease;
+  }
+  
+  .submit-step-text.show {
+    display: block;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .summary-label {
+      min-width: 100px;
+      font-size: 13px;
+    }
+    
+    .summary-value {
+      font-size: 13px;
+    }
+    
+    .summary-section-title {
+      font-size: 15px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .summary-item {
+      flex-direction: column;
+      gap: 5px;
+    }
+    
+    .summary-label {
+      min-width: auto;
+    }
+    
+    .edit-link {
+      font-size: 12px;
+    }
+  }
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header-section" style="text-align: center; margin-bottom: 30px;">
+      <div style="display: inline-flex; align-items: center; justify-content: center; width: 65px; height: 65px; background: linear-gradient(135deg, #1877f2 0%, #2948b1 100%); border-radius: 16px; margin-bottom: 12px; box-shadow: 0 6px 20px rgba(24, 119, 242, 0.3);">
+        <span style="font-size: 36px;">📋</span>
+      </div>
+      
+      <h1>
+        <span style="display: inline-flex; align-items: center; gap: 10px;">
+          RFI Requirement System
+          <span style="font-size: 20px; color: #10b981;">✓</span>
+        </span>
+      </h1>
+      <p class="subtitle">ระบบบันทึก Request for Information</p>
+    </div>
+
+    <!-- ⭐ Progress Steps Indicator -->
+    <div class="progress-steps">
+      <div class="progress-line" id="progressLine" style="width: 0%"></div>
+      
+      <div class="progress-step active" data-step="1">
+        <div class="step-circle">🏢</div>
+        <div class="step-label">ประเภทการตรวจ</div>
+      </div>
+      
+      <div class="progress-step disabled" data-step="2">
+        <div class="step-circle">📋</div>
+        <div class="step-label">ประเภทงาน & ทีม</div>
+      </div>
+      
+      <div class="progress-step disabled" data-step="3">
+        <div class="step-circle">📅</div>
+        <div class="step-label">วันที่ & เวลา</div>
+      </div>
+      
+      <div class="progress-step disabled" data-step="4">
+        <div class="step-circle">✍️</div>
+        <div class="step-label">รายละเอียด</div>
+      </div>
+      
+      <div class="progress-step disabled" data-step="5">
+        <div class="step-circle">✅</div>
+        <div class="step-label">ยืนยันข้อมูล</div>
+      </div>
+    </div>
+
+    <a href="https://calendar.google.com/calendar/u/0/embed?src=developeritd75@gmail.com&ctz=Asia/Bangkok" 
+       target="_blank" 
+       class="calendar-link-btn">
+      <span class="icon">📅</span>
+      <span>ดูปฏิทินการจอง</span>
+      <span class="external-icon">↗</span>
+    </a>
+
+    <a href="#" 
+       id="manualLinkBtn"
+       target="_blank" 
+       class="manual-link-btn"
+       style="display: none;">
+      <span class="icon">📖</span>
+      <span>คู่มือการใช้งาน</span>
+      <span class="external-icon">↗</span>
+    </a>
+    
+    <form id="rfiForm">
+      <input type="hidden" id="inspectionType" name="inspectionType" value="">
+
+      <!-- ========== STEP 1: Inspection Type ========== -->
+      <div class="step-content active" data-step="1">
+        <div class="step-header">
+          <div class="step-title">🏢 เลือกประเภทการตรวจ</div>
+          <div class="step-subtitle">กรุณาเลือกว่าต้องการตรวจแบบ Internal หรือ External</div>
+        </div>
+
+        <div class="inspection-type-section">
+          <div class="inspection-buttons">
+            <button type="button" class="inspection-btn" data-type="internal">
+              <span class="icon">🏢</span>
+              <span>Internal</span>
+            </button>
+            <button type="button" class="inspection-btn" data-type="external">
+              <span class="icon">🤝</span>
+              <span>External</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="info-box" id="infoBoxExternal">
+          <strong>📌 ข้อกำหนด (External):</strong><br>
+          <strong>📅 Lead Time:</strong> ≥ 1 วัน (จองพรุ่งนี้ปิดรับ 13:00 น.)<br>
+          <strong>📌 เลือกทีม:</strong> ควรเลือกทีมงานให้ครอบคลุมงานที่จอง<br>
+          <strong>⏰ เวลาทำการ:</strong> 09:00 - 20:00 น. (ช่วงละ 30 นาที)<br>
+          <strong>👥 จัดทีม:</strong> ระบบจะเลือกทีมที่ว่างให้อัตโนมัติ<br>
+          <strong>✅ Approval:</strong> ต้องขออนุมัติ Consultant
+        </div>
+
+        <div class="info-box internal" id="infoBoxInternal">
+          <strong>📌 ข้อกำหนด (Internal):</strong><br>
+          <strong>📅 จองวันนี้:</strong> ได้ ถ้าจองก่อน 16:00 น. ⭐<br>
+          <strong>📅 จองพรุ่งนี้:</strong> ได้ (ไม่มีข้อจำกัด)<br>
+          <strong>⚡ Lead Time:</strong> 30 นาที<br>
+          <strong>⏰ เวลาทำการ:</strong> 09:00 - 20:00 น. (ช่วงละ 30 นาที)<br>
+          <strong>👥 จัดทีม:</strong> ระบบจะเลือกทีมที่ว่างให้อัตโนมัติ<br>
+          <strong>📅 Calendar:</strong> สร้างทันที + ส่ง invitation<br>
+          <strong>✅ Approval:</strong> ไม่ต้องขออนุมัติ Consultant
+        </div>
+      </div>
+
+      <!-- ========== STEP 2: Work Type & Team ========== -->
+      <div class="step-content" data-step="2">
+        <div class="step-header">
+          <div class="step-title">📋 เลือกประเภทงานและทีม</div>
+          <div class="step-subtitle">ระบุประเภทงานที่ต้องการและเลือกทีมงาน</div>
+        </div>
+
+        <div class="form-group">
+          <label for="workType">ประเภทงาน <span>*</span></label>
+          <select id="workType" name="workType" required>
+            <option value="">-- กำลังโหลด... --</option>
+          </select>
+          <div class="time-info">เลือกประเภทงานที่ต้องการก่อน ระบบจะแนะนำทีมงานให้</div>
+          <div id="workTypeNote" class="work-type-note" style="display: none;"></div>
+        </div>
+        
+        <div class="form-group team-category-section">
+          <label>ทีมงาน <span>*</span></label>
+          
+          <div class="recommendation-box" id="recommendationBox">
+            <div id="recommendationText"></div>
+          </div>
+          
+          <div class="team-buttons">
+            <button type="button" class="team-btn" data-category="Survey">
+              <span class="icon">🔍</span>
+              <span>Survey</span>
+            </button>
+            <button type="button" class="team-btn" data-category="Lab">
+              <span class="icon">🧪</span>
+              <span>Lab</span>
+            </button>
+            <button type="button" class="team-btn" data-category="Inspector">
+              <span class="icon">📋</span>
+              <span>Inspector</span>
+            </button>
+            <button type="button" class="team-btn" data-category="งานรวม" id="multiWorkBtn">
+              <span class="icon">👥</span>
+              <span>งานรวม</span>
+            </button>
+          </div>
+          
+          <div class="multi-select-container" id="multiSelectContainer">
+            <div class="multi-select-title">✓ เลือกทีมงานที่ต้องการ (เลือกได้หลายทีม)</div>
+            <div class="checkbox-group">
+              <div class="checkbox-item">
+                <input type="checkbox" id="cbSurvey" value="Survey">
+                <span class="icon">🔍</span>
+                <label for="cbSurvey">Survey</label>
+              </div>
+              <div class="checkbox-item">
+                <input type="checkbox" id="cbLab" value="Lab">
+                <span class="icon">🧪</span>
+                <label for="cbLab">Lab</label>
+              </div>
+              <div class="checkbox-item">
+                <input type="checkbox" id="cbInspector" value="Inspector">
+                <span class="icon">📋</span>
+                <label for="cbInspector">Inspector</label>
+              </div>
+            </div>
+          </div>
+          
+          <input type="hidden" id="teamCategory" name="teamCategory" required>
+          <div class="time-info">เลือกทีมงานตามคำแนะนำ หรือเลือกเองก็ได้</div>
+        </div>
+      </div>
+
+      <!-- ========== STEP 3: Date & Time ========== -->
+      <div class="step-content" data-step="3">
+        <div class="step-header">
+          <div class="step-title">📅 เลือกวันที่และเวลา</div>
+          <div class="step-subtitle">กำหนดวันที่และช่วงเวลาที่ต้องการ</div>
+        </div>
+
+        <div class="form-group">
+          <label for="requestDate">วันที่ต้องการ <span>*</span></label>
+          <input type="date" id="requestDate" name="requestDate" required>
+        </div>
+        
+        <div class="form-group">
+          <label for="startTime">เวลาเริ่มต้น <span>*</span></label>
+          <select id="startTime" name="startTime" required disabled>
+            <option value="">-- กรุณาเลือกวันที่ก่อน --</option>
+          </select>
+          <div class="time-info">เลือกเวลาเริ่มต้นที่ต้องการ</div>
+        </div>
+        
+        <div class="form-group">
+          <label for="endTime">เวลาสิ้นสุด <span>*</span></label>
+          <select id="endTime" name="endTime" required disabled>
+            <option value="">-- กรุณาเลือกเวลาเริ่มก่อน --</option>
+          </select>
+          <div class="time-info">ระบบจะกำหนดเวลาเริ่มต้น +1 ชั่วโมง</div>
+        </div>
+      </div>
+
+      <!-- ========== STEP 4: Details ========== -->
+      <div class="step-content" data-step="4">
+        <div class="step-header">
+          <div class="step-title">✍️ กรอกรายละเอียด</div>
+          <div class="step-subtitle">ระบุรายละเอียดและแนบไฟล์ที่จำเป็น</div>
+        </div>
+
+        <div class="form-group">
+          <label for="description">รายละเอียด RFI <span>*</span></label>
+          <textarea id="description" name="description" required 
+            placeholder="ระบุรายละเอียดให้ครบถ้วน: ประเภทงาน, ขอบเขต, วัตถุประสงค์, ข้อกำหนดพิเศษ"></textarea>
+          <div class="time-info">💡 ข้อมูลที่ชัดเจนช่วยลดเวลาติดต่อกลับเพื่อแก้ไข</div>
+        </div>
+
+        <div class="form-group">
+          <label for="location">สถานที่ <span>*</span></label>
+          <input type="text" id="location" name="location" required 
+            placeholder="ระบุให้ละเอียด เช่น Crown Wall STA.0+050 to STA.0+060">
+          <div class="time-info">📍 สถานที่ที่ละเอียดช่วยให้ทีมเข้าถึงได้รวดเร็วและถูกต้อง</div>
+        </div>
+
+        <div class="form-group">
+          <label for="locationLayoutFile">📎 แนบไฟล์ Location Layout <span>*</span></label>
+          <input type="file" 
+                 id="locationLayoutFile" 
+                 name="locationLayoutFile" 
+                 accept=".pdf,.png,.jpg,.jpeg,.gif" 
+                 required
+                 style="width: 100%; padding: 10px; border: 2px dashed #1877f2; background: #f0f7ff; cursor: pointer;">
+          <div class="time-info">
+            📎 แนบไฟล์ PDF หรือรูปภาพ (PNG, JPG, GIF)<br>
+            💡 ไฟล์จะถูกบันทึกใน Google Drive อัตโนมัติ<br>
+            ⚠️ ขนาดไฟล์ไม่เกิน 10 MB
+          </div>
+          <div id="fileInfo" style="display: none; margin-top: 10px; padding: 12px; background: #ecfdf5; border-left: 4px solid #10b981; border-radius: 8px; font-size: 13px; color: #065f46;">
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px;">
+              <div style="flex: 1; min-width: 0;">
+                <strong>✓ ไฟล์ที่เลือก:</strong> <span id="fileName" style="word-break: break-all;"></span><br>
+                <strong>📏 ขนาด:</strong> <span id="fileSize"></span>
+              </div>
+              <button type="button" 
+                      id="clearFileBtn" 
+                      onclick="clearLocationFile()"
+                      title="ลบไฟล์">
+                🗑️
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="requesterName">ชื่อผู้ขอ <span>*</span></label>
+          <input type="text" id="requesterName" name="requesterName" required 
+                 placeholder="กำลังโหลด..." readonly
+                 style="background: #f0f7ff; cursor: wait;">
+          <div class="time-info" id="nameInfo">🔍 กำลังตรวจสอบข้อมูลผู้ใช้...</div>
+        </div>
+        
+        <div class="form-group">
+          <label for="requesterEmail">อีเมลผู้ขอ <span>*</span></label>
+          <input type="email" id="requesterEmail" name="requesterEmail" required readonly 
+                 style="background: linear-gradient(135deg, #f0f7ff 0%, #e7f3ff 100%); color: #1877f2; font-weight: 500; cursor: not-allowed; border-color: #1877f2;"
+                 placeholder="กำลังโหลดอีเมลของคุณ...">
+          <div class="time-info">🔒 ระบบดึงอีเมลจากบัญชี Google ของคุณอัตโนมัติ</div>
+        </div>
+      </div>
+
+      <div class="step-content" data-step="5">
+  <div class="step-header">
+    <div class="step-title">✅ ยืนยันข้อมูล</div>
+    <div class="step-subtitle">กรุณาตรวจสอบความถูกต้องของข้อมูลก่อนส่งคำขอ</div>
+  </div>
+
+  <div class="summary-card">
+    <!-- Section 1: Inspection Type & Work Type & Team -->
+    <div class="summary-section">
+      <div class="summary-section-title">
+        <span>🏢</span>
+        <span>ประเภทการตรวจและทีมงาน</span>
+        <a href="#" class="edit-link" onclick="event.preventDefault(); goToStep(1);">แก้ไข</a>
+      </div>
+      <div class="summary-item">
+        <div class="summary-label">ประเภทการตรวจ:</div>
+        <div class="summary-value highlight" id="summaryInspectionType">-</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-label">ประเภทงาน:</div>
+        <div class="summary-value" id="summaryWorkType">-</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-label">ทีมงาน:</div>
+        <div class="summary-value" id="summaryTeam">-</div>
+      </div>
+    </div>
+
+    <!-- Section 2: Date & Time -->
+    <div class="summary-section">
+      <div class="summary-section-title">
+        <span>📅</span>
+        <span>วันที่และเวลา</span>
+        <a href="#" class="edit-link" onclick="event.preventDefault(); goToStep(3);">แก้ไข</a>
+      </div>
+      <div class="summary-item">
+        <div class="summary-label">วันที่:</div>
+        <div class="summary-value highlight" id="summaryDate">-</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-label">เวลา:</div>
+        <div class="summary-value" id="summaryTime">-</div>
+      </div>
+    </div>
+
+    <!-- Section 3: Work Details -->
+    <div class="summary-section">
+      <div class="summary-section-title">
+        <span>📝</span>
+        <span>รายละเอียดงาน</span>
+        <a href="#" class="edit-link" onclick="event.preventDefault(); goToStep(4);">แก้ไข</a>
+      </div>
+      <div class="summary-item description-item">
+        <div class="summary-label">รายละเอียด RFI:</div>
+        <div class="summary-value" id="summaryDescription">-</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-label">สถานที่:</div>
+        <div class="summary-value" id="summaryLocation">-</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-label">ไฟล์แนบ:</div>
+        <div class="summary-value" id="summaryFile">-</div>
+      </div>
+    </div>
+
+    <!-- Section 4: Requester Info -->
+    <div class="summary-section">
+      <div class="summary-section-title">
+        <span>👤</span>
+        <span>ข้อมูลผู้ขอ</span>
+        <a href="#" class="edit-link" onclick="event.preventDefault(); goToStep(4);">แก้ไข</a>
+      </div>
+      <div class="summary-item">
+        <div class="summary-label">ผู้ขอ:</div>
+        <div class="summary-value" id="summaryRequester">-</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Submit Button -->
+  <div class="submit-progress-container">
+    <button type="submit" id="submitBtn">
+      <span>✓</span>
+      <span>ยืนยันและส่งคำขอ</span>
+    </button>
+    <div class="submit-progress-bar" id="submitProgressBar"></div>
+  </div>
+  <div class="submit-step-text" id="submitStepText"></div>
+</div>
+
+      <!-- Navigation Buttons -->
+      <div class="step-navigation" id="stepNavigation">
+        <button type="button" class="btn-prev" id="btnPrev" disabled>
+          <span>←</span>
+          <span>ย้อนกลับ</span>
+        </button>
+        <button type="button" class="btn-next" id="btnNext">
+          <span>ถัดไป</span>
+          <span>→</span>
+        </button>
+      </div>
+    </form>
+    
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <p>กำลังประมวลผล...</p>
+    </div>
+    
+    <div id="message" class="message"></div>
+    
+    <div class="footer-info">
+      <p>RFI Requirement System</p>
+      <p class="version">ระบบจะส่งอีเมลแจ้งไปยังทีม QC และจัดทีมให้อัตโนมัติ</p>
+    </div>
+  </div>
+  
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script>
+    // ========== Progressive Form Logic ==========
+    
+    var currentStep = 1;
+    var totalSteps = 5;
+    var completedSteps = new Set();
+    
+    // Step Configuration
+    var STEP_CONFIG = {
+      1: {
+        title: 'ประเภทการตรวจ',
+        requiredFields: ['inspectionType'],
+        validate: validateStep1
+      },
+      2: {
+        title: 'ประเภทงาน & ทีม',
+        requiredFields: ['workType', 'teamCategory'],
+        validate: validateStep2
+      },
+      3: {
+        title: 'วันที่ & เวลา',
+        requiredFields: ['requestDate', 'startTime', 'endTime'],
+        validate: validateStep3
+      },
+      4: {
+        title: 'รายละเอียด',
+        requiredFields: ['description', 'location', 'locationLayoutFile', 'requesterName', 'requesterEmail'],
+        validate: validateStep4
+      },
+      5: {
+        title: 'ยืนยันข้อมูล',
+        requiredFields: [],
+        validate: function() { return { valid: true }; }
+      }
+    };
+    
+    // Initialize
+    function initProgressiveForm() {
+      setupStepNavigation();
+      setupStepClickHandlers();
+      updateNavigationButtons();
+      updateProgressLine();
+    }
+    
+    // Setup Navigation
+    function setupStepNavigation() {
+      document.getElementById('btnPrev').addEventListener('click', function() {
+        if (currentStep > 1) {
+          goToStep(currentStep - 1);
+        }
+      });
+      
+      document.getElementById('btnNext').addEventListener('click', function() {
+        if (currentStep < totalSteps) {
+          var validation = validateCurrentStep();
+          
+          if (validation.valid) {
+            completedSteps.add(currentStep);
+            goToStep(currentStep + 1);
+          } else {
+            showToast('⚠️ กรุณากรอกข้อมูลให้ครบถ้วน', validation.message, 'warning', 5000);
+          }
+        }
+      });
+    }
+    
+    // Setup Step Click Handlers
+    function setupStepClickHandlers() {
+      var steps = document.querySelectorAll('.progress-step');
+      
+      steps.forEach(function(step) {
+        step.addEventListener('click', function() {
+          var targetStep = parseInt(this.getAttribute('data-step'));
+          
+          // อนุญาตให้กลับไปขั้นตอนที่ผ่านมาแล้วเท่านั้น
+          if (!this.classList.contains('disabled') && targetStep < currentStep) {
+            goToStep(targetStep);
+          }
+        });
+      });
+    }
+    
+    // Go to Step
+    function goToStep(stepNumber) {
+      if (stepNumber < 1 || stepNumber > totalSteps) return;
+      
+      console.log('🔄 Going to step:', stepNumber);
+      
+      // Hide all steps
+      var allSteps = document.querySelectorAll('.step-content');
+      allSteps.forEach(function(content) {
+        content.classList.remove('active');
+      });
+      
+      // Show target step
+      var targetContent = document.querySelector('.step-content[data-step="' + stepNumber + '"]');
+      if (targetContent) {
+        targetContent.classList.add('active');
+      }
+      
+      // Update progress indicators
+      updateProgressIndicators(stepNumber);
+      
+      // Update current step
+      currentStep = stepNumber;
+      
+      // Update buttons
+      updateNavigationButtons();
+      
+      // Update progress line
+      updateProgressLine();
+      
+      // Update summary if on step 5
+      if (stepNumber === 5) {
+        updateSummary();
+      }
+      
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    
+    // Update Progress Indicators
+    function updateProgressIndicators(activeStep) {
+      var steps = document.querySelectorAll('.progress-step');
+      
+      steps.forEach(function(step) {
+        var stepNumber = parseInt(step.getAttribute('data-step'));
+        
+        step.classList.remove('active', 'completed', 'disabled');
+        
+        if (stepNumber === activeStep) {
+          step.classList.add('active');
+        } else if (stepNumber < activeStep || completedSteps.has(stepNumber)) {
+          step.classList.add('completed');
+        } else {
+          step.classList.add('disabled');
+        }
+      });
+    }
+    
+    // Update Navigation Buttons
+    function updateNavigationButtons() {
+      var btnPrev = document.getElementById('btnPrev');
+      var btnNext = document.getElementById('btnNext');
+      var stepNav = document.getElementById('stepNavigation');
+      
+      // ซ่อน navigation ใน step 5
+      if (currentStep === 5) {
+        stepNav.style.display = 'none';
+      } else {
+        stepNav.style.display = 'flex';
+      }
+      
+      // Previous button
+      if (currentStep === 1) {
+        btnPrev.disabled = true;
+      } else {
+        btnPrev.disabled = false;
+      }
+      
+      // Next button
+      if (currentStep === totalSteps) {
+        btnNext.style.display = 'none';
+      } else {
+        btnNext.style.display = 'flex';
+        btnNext.innerHTML = '<span>ถัดไป</span><span>→</span>';
+      }
+    }
+    
+    // Update Progress Line
+    function updateProgressLine() {
+      var progressLine = document.getElementById('progressLine');
+      var percentage = ((currentStep - 1) / (totalSteps - 1)) * 100;
+      
+      progressLine.style.width = percentage + '%';
+    }
+    
+    // Validate Current Step
+    function validateCurrentStep() {
+      var stepConfig = STEP_CONFIG[currentStep];
+      
+      if (!stepConfig) {
+        return { valid: true };
+      }
+      
+      return stepConfig.validate();
+    }
+    
+    // ========== Step Validation Functions ==========
+    
+    function validateStep1() {
+      var inspectionType = document.getElementById('inspectionType').value;
+      
+      if (!inspectionType || !selectedInspectionType) {
+        return {
+          valid: false,
+          message: 'กรุณาเลือกประเภทการตรวจ (Internal หรือ External)'
+        };
+      }
+      
+      return { valid: true };
+    }
+    
+function validateStep2() {
+      var workType = document.getElementById('workType').value;
+      var teamCategory = document.getElementById('teamCategory').value;
+      
+      if (!workType) {
+        return {
+          valid: false,
+          message: 'กรุณาเลือกประเภทงาน'
+        };
+      }
+      
+      if (!teamCategory || !selectedTeamCategory) {
+        return {
+          valid: false,
+          message: 'กรุณาเลือกทีมงาน'
+        };
+      }
+      
+      // ⭐ เช็คว่าเลือกทีมที่แนะนำหรือไม่
+      if (recommendedCategory && recommendedCategory.length > 0) {
+        var recommendedList = recommendedCategory.map(function(r) { 
+          return r.category; 
+        });
+        
+        // กรณีเลือกงานรวม - ต้องเลือกเฉพาะทีมที่อยู่ในคำแนะนำ
+        if (isMultiWork) {
+          var selectedTeams = selectedTeamCategory.split(',');
+          var invalidTeams = [];
+          
+          selectedTeams.forEach(function(team) {
+            if (!recommendedList.includes(team)) {
+              invalidTeams.push(team);
+            }
+          });
+          
+          if (invalidTeams.length > 0) {
+            return {
+              valid: false,
+              message: '⚠️ มีทีมที่เลือกไม่อยู่ในคำแนะนำ!\n\n' +
+                      'ทีมที่ไม่ถูกต้อง: ' + invalidTeams.join(', ') + 
+                      '\nทีมที่แนะนำ: ' + recommendedList.join(', ') + 
+                      '\n\n💡 กรุณาเลือกเฉพาะทีมที่อยู่ในคำแนะนำเท่านั้น'
+            };
+          }
+        } else {
+          // กรณีเลือกทีมเดียว - เช็คว่าตรงกับคำแนะนำหรือไม่
+          if (!recommendedList.includes(selectedTeamCategory)) {
+            return {
+              valid: false,
+              message: '⚠️ คุณไม่ได้เลือกทีมที่แนะนำ!\n\n' +
+                      'ทีมที่เลือก: ' + selectedTeamCategory + 
+                      '\nทีมที่แนะนำ: ' + recommendedList.join(', ') + 
+                      '\n\n💡 หากต้องการเลือกหลายทีม กรุณาเลือก "งานรวม"'
+            };
+          }
+        }
+      }
+      
+      return { valid: true };
+    }
+    
+    function validateStep3() {
+      var requestDate = document.getElementById('requestDate').value;
+      var startTime = document.getElementById('startTime').value;
+      var endTime = document.getElementById('endTime').value;
+      
+      if (!requestDate) {
+        return {
+          valid: false,
+          message: 'กรุณาเลือกวันที่'
+        };
+      }
+      
+      if (!startTime) {
+        return {
+          valid: false,
+          message: 'กรุณาเลือกเวลาเริ่มต้น'
+        };
+      }
+      
+      if (!endTime) {
+        return {
+          valid: false,
+          message: 'กรุณาเลือกเวลาสิ้นสุด'
+        };
+      }
+      
+      return { valid: true };
+    }
+    
+    function validateStep4() {
+      var description = document.getElementById('description').value.trim();
+      var location = document.getElementById('location').value.trim();
+      var fileInput = document.getElementById('locationLayoutFile');
+      var requesterName = document.getElementById('requesterName').value.trim();
+      var requesterEmail = document.getElementById('requesterEmail').value.trim();
+      
+      if (!description) {
+        return {
+          valid: false,
+          message: 'กรุณากรอกรายละเอียด RFI'
+        };
+      }
+      
+      if (description.length < 10) {
+        return {
+          valid: false,
+          message: 'รายละเอียดควรมีอย่างน้อย 10 ตัวอักษร'
+        };
+      }
+      
+      if (!location) {
+        return {
+          valid: false,
+          message: 'กรุณากรอกสถานที่'
+        };
+      }
+      
+      if (!fileInput.files || fileInput.files.length === 0) {
+        return {
+          valid: false,
+          message: 'กรุณาแนบไฟล์ Location Layout'
+        };
+      }
+      
+      if (!requesterName) {
+        return {
+          valid: false,
+          message: 'กรุณากรอกชื่อผู้ขอ'
+        };
+      }
+      
+      if (!requesterEmail || requesterEmail === 'กำลังโหลด...') {
+        return {
+          valid: false,
+          message: 'กรุณารอจนกว่าระบบจะโหลดอีเมลเสร็จ'
+        };
+      }
+      
+      return { valid: true };
+    }
+    
+    // ========== Update Summary ==========
+    
+function updateSummary() {
+  console.log('📋 Updating summary...');
+  
+  // 1. Inspection Type
+  var inspectionType = document.getElementById('inspectionType').value;
+  var inspectionText = inspectionType === 'internal' 
+    ? '🏢 Internal Inspection' 
+    : '🤝 External Inspection';
+  document.getElementById('summaryInspectionType').textContent = inspectionText;
+  
+  // 2. Work Type
+  var workTypeSelect = document.getElementById('workType');
+  var workTypeText = workTypeSelect.options[workTypeSelect.selectedIndex]?.text || '-';
+  document.getElementById('summaryWorkType').textContent = workTypeText;
+  
+  // 3. Team Category
+  var teamCategory = selectedTeamCategory || '-';
+  document.getElementById('summaryTeam').textContent = teamCategory.replace(/,/g, ', ');
+  
+  // 4. Date (แปลงเป็นภาษาไทย)
+  var requestDate = document.getElementById('requestDate').value;
+  if (requestDate) {
+    var dateObj = new Date(requestDate + 'T00:00:00');
+    var dateText = dateObj.toLocaleDateString('th-TH', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+    document.getElementById('summaryDate').textContent = dateText;
+  } else {
+    document.getElementById('summaryDate').textContent = '-';
+  }
+  
+  // 5. Time
+  var startTime = document.getElementById('startTime').value;
+  var endTime = document.getElementById('endTime').value;
+  if (startTime && endTime) {
+    document.getElementById('summaryTime').textContent = startTime + ' - ' + endTime + ' น.';
+  } else {
+    document.getElementById('summaryTime').textContent = '-';
+  }
+  
+  // 6. Location
+  var location = document.getElementById('location').value || '-';
+  document.getElementById('summaryLocation').textContent = location;
+  
+  // 7. Description (แสดงเต็มทั้งหมด + Scrollable)
+  var description = document.getElementById('description').value.trim() || '-';
+  var summaryDescriptionElement = document.getElementById('summaryDescription');
+  
+  if (summaryDescriptionElement) {
+    summaryDescriptionElement.textContent = description;
+    
+    // เพิ่ม Tooltip ถ้าข้อความยาว
+    if (description.length > 200) {
+      summaryDescriptionElement.title = 'เลื่อนลงเพื่อดูรายละเอียดเพิ่มเติม';
+    }
+  }
+  
+  // 8. File (แสดงชื่อไฟล์ + ขนาด)
+  var fileInput = document.getElementById('locationLayoutFile');
+  if (fileInput.files && fileInput.files.length > 0) {
+    var file = fileInput.files[0];
+    document.getElementById('summaryFile').textContent = 
+      file.name + ' (' + formatFileSize(file.size) + ')';
+  } else {
+    document.getElementById('summaryFile').textContent = '-';
+  }
+  
+  // 9. Requester (ชื่อ + อีเมล)
+  var requesterName = document.getElementById('requesterName').value;
+  var requesterEmail = document.getElementById('requesterEmail').value;
+  if (requesterName && requesterEmail) {
+    document.getElementById('summaryRequester').textContent = 
+      requesterName + ' (' + requesterEmail + ')';
+  } else {
+    document.getElementById('summaryRequester').textContent = '-';
+  }
+  
+  console.log('✅ Summary updated successfully');
+}
+    var selectedTeamCategory = null;
+    var isMultiWork = false;
+    var recommendedCategory = null;
+    var selectedInspectionType = null; // ⭐ ใหม่
+    
+window.onload = function() {
+  setMinDate();
+  loadWorkTypes();
+  initInspectionTypeButtons();
+  initTeamCategoryButtons();
+  initCheckboxes();
+  loadUserEmailAndName();
+  loadManualLink();
+  setupFormChangeDetection();
+  checkTodayHolidayStatus(); // ⭐ เพิ่มบรรทัดนี้
+  showMessage('กรุณาเลือกประเภทการตรวจ (Internal หรือ External) ก่อน', 'info');
+};
+
+    // ⭐ Prevent Page Exit - ป้องกันการออกจากหน้าเว็บขณะกรอกฟอร์ม
+    var formChanged = false;
+    var isSubmitting = false;
+    
+    // ตรวจจับการเปลี่ยนแปลงในฟอร์ม
+    function setupFormChangeDetection() {
+      var form = document.getElementById('rfiForm');
+      var inputs = form.querySelectorAll('input, select, textarea');
+      
+      inputs.forEach(function(input) {
+        // ข้ามฟิลด์ที่ readonly (เช่น email)
+        if (input.readOnly || input.disabled) return;
+        
+        input.addEventListener('change', function() {
+          formChanged = true;
+          console.log('Form changed detected');
+        });
+        
+        input.addEventListener('input', function() {
+          formChanged = true;
+        });
+      });
+      
+      // ตรวจจับการคลิกปุ่ม Inspection Type และ Team
+      var inspectionButtons = document.querySelectorAll('.inspection-btn');
+      var teamButtons = document.querySelectorAll('.team-btn');
+      
+      inspectionButtons.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          formChanged = true;
+        });
+      });
+      
+      teamButtons.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          formChanged = true;
+        });
+      });
+    }
+    
+    // ป้องกันการออกจากหน้าเว็บ
+    window.addEventListener('beforeunload', function(e) {
+      // ถ้ากำลัง submit หรือฟอร์มไม่ได้เปลี่ยนแปลง ให้ออกได้เลย
+      if (isSubmitting || !formChanged) {
+        return undefined;
+      }
+      
+      // แสดงข้อความเตือน
+      var confirmationMessage = 'คุณมีข้อมูลที่ยังไม่ได้บันทึก ต้องการออกจากหน้านี้หรือไม่?';
+      
+      e.preventDefault();
+      e.returnValue = confirmationMessage;
+      return confirmationMessage;
+    });
+    
+    // รีเซ็ต flag เมื่อ submit สำเร็จ
+    function resetFormChangeFlag() {
+      formChanged = false;
+      isSubmitting = false;
+      console.log('Form change flag reset');
+    }
+    
+    // ตั้งค่า flag เมื่อเริ่ม submit
+    function setSubmittingFlag() {
+      isSubmitting = true;
+      console.log('Submitting flag set');
+    }
+
+// อัปเดต: File Upload Event Listener
+document.getElementById('locationLayoutFile').addEventListener('change', function(e) {
+  var file = e.target.files[0];
+  var fileInfo = document.getElementById('fileInfo');
+  var fileName = document.getElementById('fileName');
+  var fileSize = document.getElementById('fileSize');
+  var clearBtn = document.getElementById('clearFileBtn');
+  
+  if (file) {
+    // ⭐ เช็คขนาดไฟล์ (ไม่เกิน 10 MB)
+    var maxSize = 10 * 1024 * 1024; // 10 MB
+    
+    if (file.size > maxSize) {
+      showMessage('❌ ไฟล์ใหญ่เกินไป! ขนาดไฟล์ต้องไม่เกิน 10 MB', 'error');
+      e.target.value = ''; // ล้างไฟล์
+      fileInfo.style.display = 'none';
+      clearBtn.style.display = 'none';
+      return;
+    }
+    
+    // ⭐ แสดงข้อมูลไฟล์
+    fileName.textContent = file.name;
+    fileSize.textContent = formatFileSize(file.size);
+    fileInfo.style.display = 'block';
+    clearBtn.style.display = 'block'; // ⭐ แสดงปุ่มลบ
+    
+    showMessage('✓ เลือกไฟล์: ' + file.name, 'success', 3000);
+  } else {
+    fileInfo.style.display = 'none';
+    clearBtn.style.display = 'none';
+  }
+});
+
+// ⭐ UPDATED: ลบไฟล์ + ซ่อนปุ่ม
+function clearLocationFile() {
+  var fileInput = document.getElementById('locationLayoutFile');
+  var fileInfo = document.getElementById('fileInfo');
+  var clearBtn = document.getElementById('clearFileBtn');
+  
+  if (confirm('🗑️ ต้องการลบไฟล์ที่เลือกไว้หรือไม่?')) {
+    fileInput.value = '';
+    fileInfo.style.display = 'none';
+    if (clearBtn) clearBtn.style.display = 'none';
+    
+    console.log('✅ File cleared');
+    showMessage('🗑️ ลบไฟล์เรียบร้อยแล้ว - กรุณาเลือกไฟล์ใหม่', 'info', 3000);
+  }
+}
+
+// ⭐ ฟังก์ชันแปลงขนาดไฟล์
+function formatFileSize(bytes) {
+  if (bytes === 0) return '0 Bytes';
+  
+  var k = 1024;
+  var sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  var i = Math.floor(Math.log(bytes) / Math.log(k));
+  
+  return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+}
+
+function initInspectionTypeButtons() {
+  var inspectionButtons = document.querySelectorAll('.inspection-btn');
+  
+  inspectionButtons.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      inspectionButtons.forEach(function(b) {
+        b.classList.remove('active');
+      });
+      
+      this.classList.add('active');
+      
+      var type = this.getAttribute('data-type');
+      selectedInspectionType = type;
+      document.getElementById('inspectionType').value = type;
+      
+      var externalBox = document.getElementById('infoBoxExternal');
+      var internalBox = document.getElementById('infoBoxInternal');
+      
+      if (type === 'external') {
+        externalBox.classList.add('show');
+        internalBox.classList.remove('show');
+        showMessage('✅ เลือก: External Inspection', 'success', 2000);
+        setMinDateExternal();
+      } else if (type === 'internal') {
+        internalBox.classList.add('show');
+        externalBox.classList.remove('show');
+        showMessage('✅ เลือก: Internal Inspection', 'success', 2000);
+        setMinDateInternal();
+      }
+      
+      document.getElementById('requestDate').value = '';
+      document.getElementById('startTime').innerHTML = '<option value="">-- กรุณาเลือกวันที่ก่อน --</option>';
+      document.getElementById('startTime').disabled = true;
+      resetEndTimeSelect();
+      
+      console.log('✅ Selected Inspection Type:', type);
+      
+      // ⭐ ลบส่วน Auto Next ออกทั้งหมด
+      // ให้ผู้ใช้กดปุ่ม "ถัดไป" เอง
+      
+      // แสดงข้อความแนะนำ
+      showToast(
+        '✅ เลือกประเภทการตรวจเรียบร้อย',
+        '📖 กรุณาอ่านข้อกำหนดด้านล่าง จากนั้นกดปุ่ม "ถัดไป"',
+        'success',
+        5000
+      );
+      
+      // เน้นปุ่ม "ถัดไป" ให้เด่นชัดขึ้น
+      var btnNext = document.getElementById('btnNext');
+      if (btnNext) {
+        btnNext.style.animation = 'pulse 1.5s ease-in-out 3'; // กระพริบ 3 ครั้ง
+      }
+    });
+  });
+}
+
+    // ⭐ ตั้ง Min Date สำหรับ External (พรุ่งนี้)
+    function setMinDateExternal() {
+      var today = new Date();
+      var tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      
+      var dateString = tomorrow.getFullYear() + '-' + 
+                      String(tomorrow.getMonth() + 1).padStart(2, '0') + '-' + 
+                      String(tomorrow.getDate()).padStart(2, '0');
+      document.getElementById('requestDate').setAttribute('min', dateString);
+    }
+
+    // ⭐ ตั้ง Min Date สำหรับ Internal (วันนี้)
+    function setMinDateInternal() {
+      var today = new Date();
+      var dateString = today.getFullYear() + '-' + 
+                      String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+                      String(today.getDate()).padStart(2, '0');
+      document.getElementById('requestDate').setAttribute('min', dateString);
+    }
+
+    function loadManualLink() {
+      google.script.run
+        .withSuccessHandler(function(url) {
+          if (url) {
+            var manualBtn = document.getElementById('manualLinkBtn');
+            manualBtn.href = url + '?page=manual';
+            manualBtn.style.display = 'flex';
+          }
+        })
+        .withFailureHandler(function(error) {
+          console.error('Error loading manual link:', error);
+        })
+        .getManualUrl();
+    }
+    
+    function initTeamCategoryButtons() {
+      var teamButtons = document.querySelectorAll('.team-btn');
+      var multiSelectContainer = document.getElementById('multiSelectContainer');
+      
+      teamButtons.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          teamButtons.forEach(function(b) {
+            b.classList.remove('active');
+            b.classList.remove('recommended');
+          });
+          
+          this.classList.add('active');
+          
+          var category = this.getAttribute('data-category');
+          
+          if (category === 'งานรวม') {
+            isMultiWork = true;
+            multiSelectContainer.classList.add('show');
+            selectedTeamCategory = null;
+            document.getElementById('teamCategory').value = '';
+            showMessage('เลือกหมวดงานที่ต้องการ (สามารถเลือกได้หลายหมวด)', 'info', 3000);
+          } else {
+            isMultiWork = false;
+            multiSelectContainer.classList.remove('show');
+            clearAllCheckboxes();
+            selectedTeamCategory = category;
+            document.getElementById('teamCategory').value = category;
+            
+            if (recommendedCategory && category === recommendedCategory) {
+              showMessage('✓ เลือกหมวดงาน: ' + category + ' (ตามคำแนะนำ)', 'success', 2000);
+            } else {
+              showMessage('เลือกหมวดงาน: ' + category, 'info', 2000);
+            }
+          }
+        });
+      });
+    }
+    
+    function initCheckboxes() {
+      var checkboxes = document.querySelectorAll('#multiSelectContainer input[type="checkbox"]');
+      
+      checkboxes.forEach(function(checkbox) {
+        checkbox.addEventListener('change', updateMultiWorkSelection);
+      });
+    }
+    
+    function updateMultiWorkSelection() {
+      if (!isMultiWork) return;
+      
+      var checkboxes = document.querySelectorAll('#multiSelectContainer input[type="checkbox"]:checked');
+      var selectedCategories = [];
+      
+      checkboxes.forEach(function(cb) {
+        selectedCategories.push(cb.value);
+      });
+      
+      if (selectedCategories.length > 0) {
+        selectedTeamCategory = selectedCategories.join(',');
+        document.getElementById('teamCategory').value = selectedTeamCategory;
+        showMessage('เลือก: ' + selectedTeamCategory, 'info', 2000);
+      } else {
+        selectedTeamCategory = null;
+        document.getElementById('teamCategory').value = '';
+      }
+    }
+    
+    function clearAllCheckboxes() {
+      var checkboxes = document.querySelectorAll('#multiSelectContainer input[type="checkbox"]');
+      checkboxes.forEach(function(cb) {
+        cb.checked = false;
+      });
+    }
+
+    function loadUserEmailAndName() {
+      var emailInput = document.getElementById('requesterEmail');
+      var nameInput = document.getElementById('requesterName');
+      var nameInfo = document.getElementById('nameInfo');
+      
+      emailInput.value = 'กำลังโหลด...';
+      emailInput.disabled = true;
+      
+      nameInput.value = '';
+      nameInput.placeholder = 'กำลังโหลด...';
+      nameInput.readOnly = true;
+      nameInput.style.background = '#f0f7ff';
+      nameInput.style.cursor = 'wait';
+      
+      google.script.run
+        .withSuccessHandler(function(email) {
+          if (email) {
+            emailInput.value = email;
+            emailInput.disabled = true;
+            
+            google.script.run
+              .withSuccessHandler(function(result) {
+                if (result.success && result.name) {
+                  nameInput.value = result.name;
+                  nameInput.readOnly = false;
+                  nameInput.style.background = 'linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)';
+                  nameInput.style.cursor = 'text';
+                  nameInfo.innerHTML = '✅ พบข้อมูลในระบบ - สามารถแก้ไขได้';
+                  nameInfo.style.color = '#16a34a';
+                } else if (!result.success && result.message) {
+                  nameInput.value = '';
+                  nameInput.placeholder = 'ไม่มีสิทธิ์ใช้งาน';
+                  nameInput.readOnly = true;
+                  nameInput.style.background = '#fee2e2';
+                  nameInfo.innerHTML = '❌ ' + result.message;
+                  nameInfo.style.color = '#dc2626';
+                  showMessage(result.message, 'error');
+                } else {
+                  nameInput.value = '';
+                  nameInput.placeholder = 'กรอกชื่อ-นามสกุล';
+                  nameInput.readOnly = false;
+                  nameInput.style.background = '#ffffff';
+                  nameInput.style.cursor = 'text';
+                  nameInfo.innerHTML = '📝 กรอกชื่อผู้ขอ - ระบบจะบันทึกในฐานข้อมูล';
+                  nameInfo.style.color = '#1877f2';
+                }
+              })
+              .withFailureHandler(function(error) {
+                nameInput.value = '';
+                nameInput.placeholder = 'เกิดข้อผิดพลาด';
+                nameInput.readOnly = false;
+                nameInput.style.background = '#ffffff';
+                nameInput.style.cursor = 'text';
+                nameInfo.innerHTML = '⚠️ เกิดข้อผิดพลาด - กรุณากรอกชื่อ';
+                nameInfo.style.color = '#f59e0b';
+              })
+              .getUserNameFromEmail(email);
+            
+          } else {
+            emailInput.value = '';
+            emailInput.placeholder = 'ไม่สามารถดึงอีเมลได้ - กรุณา Login';
+            emailInput.disabled = false;
+            
+            nameInput.value = '';
+            nameInput.placeholder = 'กรุณา Login ก่อน';
+            nameInput.readOnly = true;
+            nameInput.style.background = '#fee2e2';
+            nameInfo.innerHTML = '⚠️ กรุณา Login ด้วย Google Account';
+            nameInfo.style.color = '#dc2626';
+            
+            showMessage('⚠️ กรุณา Login ด้วย Google Account', 'warning');
+          }
+        })
+        .withFailureHandler(function(error) {
+          emailInput.value = '';
+          emailInput.placeholder = 'เกิดข้อผิดพลาด - กรุณา Login';
+          emailInput.disabled = false;
+          
+          nameInput.value = '';
+          nameInput.placeholder = 'กรุณา Login ก่อน';
+          nameInput.readOnly = true;
+          nameInput.style.background = '#fee2e2';
+          nameInfo.innerHTML = '⚠️ เกิดข้อผิดพลาดในการดึงข้อมูล';
+          nameInfo.style.color = '#dc2626';
+          
+          showMessage('เกิดข้อผิดพลาดในการดึงอีเมล', 'error');
+        })
+        .getCurrentUserEmail();
+    }
+    
+function loadWorkTypes() {
+  var workTypeSelect = document.getElementById('workType');
+  var workTypeNote = document.getElementById('workTypeNote');
+  
+  workTypeSelect.innerHTML = '<option value="">-- กำลังโหลดประเภทงาน... --</option>';
+  workTypeSelect.disabled = true;
+  
+  if (workTypeNote) {
+    workTypeNote.style.display = 'none';
+    workTypeNote.innerHTML = '';
+  }
+  
+  google.script.run
+    .withSuccessHandler(function(workTypes) {
+      workTypeSelect.innerHTML = '';
+      
+      if (!workTypes || workTypes.length === 0) {
+        workTypeSelect.innerHTML = '<option value="">-- ไม่พบประเภทงาน --</option>';
+        showMessage('ไม่พบข้อมูลประเภทงาน กรุณาเพิ่มข้อมูลใน Sheet "Work"', 'warning');
+      } else {
+        workTypeSelect.innerHTML = '<option value="">-- เลือกประเภทงาน --</option>';
+        
+        workTypes.forEach(function(workType) {
+          var option = document.createElement('option');
+          option.value = workType.name;
+          
+          // ✅ Format: "QC_Type Name_Work (Duration นาที)"
+          option.textContent = workType.qcType + ' ' + workType.name + ' (' + workType.duration + ' นาที)';
+          
+          option.setAttribute('data-duration', workType.duration);
+          option.setAttribute('data-qctype', workType.qcType);
+          option.setAttribute('data-sequence', workType.sequence);
+          option.setAttribute('data-note', workType.note || ''); // ✅ เก็บ note
+          
+          workTypeSelect.appendChild(option);
+        });
+        
+        workTypeSelect.disabled = false;
+        
+        // ✅ เพิ่ม Event Listener สำหรับแสดง Note
+        workTypeSelect.addEventListener('change', handleWorkTypeChange);
+      }
+    })
+    .withFailureHandler(function(error) {
+      workTypeSelect.innerHTML = '<option value="">-- เกิดข้อผิดพลาด --</option>';
+      showMessage('เกิดข้อผิดพลาดในการโหลดประเภทงาน', 'error');
+    })
+    .getWorkTypeList();
+}
+    
+function handleWorkTypeChange() {
+  var workType = document.getElementById('workType').value;
+  var workTypeSelect = document.getElementById('workType');
+  var workTypeNote = document.getElementById('workTypeNote');
+  
+  // ✅ Reset Time เมื่อเปลี่ยน Work Type
+  resetTimeSelects();
+  
+  // ✅ แสดง/ซ่อน Note
+  if (workType && workTypeNote) {
+    var selectedOption = workTypeSelect.options[workTypeSelect.selectedIndex];
+    var note = selectedOption.getAttribute('data-note');
+    
+    if (note && note.trim() !== '') {
+      workTypeNote.innerHTML = '<strong>หมายเหตุ:</strong> ' + note;
+      workTypeNote.style.display = 'block';
+    } else {
+      workTypeNote.style.display = 'none';
+      workTypeNote.innerHTML = '';
+    }
+  } else if (workTypeNote) {
+    workTypeNote.style.display = 'none';
+    workTypeNote.innerHTML = '';
+  }
+  
+  if (!workType) {
+    hideRecommendation();
+    return;
+  }
+  
+  showRecommendationLoading();
+  
+  google.script.run
+    .withSuccessHandler(handleRecommendationResponse)
+    .withFailureHandler(function(error) {
+      hideRecommendation();
+    })
+    .getRecommendedCategory(workType);
+}
+
+function resetTimeSelects() {
+  var startTimeSelect = document.getElementById('startTime');
+  var endTimeSelect = document.getElementById('endTime');
+  var dateInput = document.getElementById('requestDate');
+  
+  // เก็บค่าวันที่ไว้
+  var currentDate = dateInput.value;
+  
+  // Reset Start Time
+  if (currentDate) {
+    // ถ้ามีวันที่อยู่แล้ว ให้ reload slots ใหม่
+    startTimeSelect.innerHTML = '<option value="">-- กำลังโหลดเวลาใหม่... --</option>';
+    startTimeSelect.disabled = true;
+    startTimeSelect.className += ' loading-select';
+  } else {
+    startTimeSelect.innerHTML = '<option value="">-- กรุณาเลือกวันที่ก่อน --</option>';
+    startTimeSelect.disabled = true;
+  }
+  
+  startTimeSelect.value = '';
+  
+  // Reset End Time
+  resetEndTimeSelect();
+  
+  console.log('✅ Time selects reset due to Work Type change');
+  
+  // ✅ ถ้ามีวันที่อยู่แล้ว ให้โหลด slots ใหม่ทันที
+  if (currentDate) {
+    setTimeout(function() {
+      updateAvailableSlots();
+    }, 100);
+  }
+}
+
+    
+    function showRecommendationLoading() {
+      var box = document.getElementById('recommendationBox');
+      var text = document.getElementById('recommendationText');
+      
+      text.innerHTML = '🔍 กำลังวิเคราะห์ทีมงานที่เหมาะสม...';
+      box.classList.add('show');
+      
+      document.querySelectorAll('.team-btn').forEach(function(btn) {
+        btn.classList.remove('recommended');
+      });
+    }
+    
+    function handleRecommendationResponse(result) {
+      if (!result || !result.success || !result.recommended || result.recommended.length === 0) {
+        hideRecommendation();
+        return;
+      }
+      
+      recommendedCategory = result.recommended;
+      showRecommendation(result);
+      highlightRecommendedButtons(result.recommended);
+    }
+    
+    function showRecommendation(result) {
+      var box = document.getElementById('recommendationBox');
+      var text = document.getElementById('recommendationText');
+      
+      var recommendedList = result.recommended;
+      
+      if (recommendedList.length === 1) {
+        var item = recommendedList[0];
+        var icon = getCategoryIcon(item.category);
+        
+        var html = '<strong>' + icon + ' แนะนำทีมงาน: ' + item.category + '</strong>';
+        html += '<div class="team-info">✓ มีทีมรองรับ ' + item.count + ' ทีม';
+        
+        if (item.teams.length > 0 && item.teams.length <= 3) {
+          html += ' (' + item.teams.join(', ') + ')';
+        }
+        
+        html += '</div>';
+        text.innerHTML = html;
+      } else {
+        var html = '<strong>💡 แนะนำทีมงานที่รองรับ:</strong><div class="team-info">';
+        
+        recommendedList.forEach(function(item, index) {
+          var icon = getCategoryIcon(item.category);
+          html += icon + ' <strong>' + item.category + '</strong>: ' + item.count + ' ทีม';
+          
+          if (item.teams.length > 0 && item.teams.length <= 2) {
+            html += ' (' + item.teams.join(', ') + ')';
+          }
+          
+          if (index < recommendedList.length - 1) {
+            html += '<br>';
+          }
+        });
+        
+        html += '</div>';
+        text.innerHTML = html;
+      }
+      
+      box.classList.add('show');
+    }
+    
+    function getCategoryIcon(category) {
+      if (category === 'Survey') return '🔍';
+      if (category === 'Lab') return '🧪';
+      if (category === 'Inspector') return '📋';
+      return '💡';
+    }
+    
+    function highlightRecommendedButtons(recommendedList) {
+      document.querySelectorAll('.team-btn').forEach(function(btn) {
+        btn.classList.remove('recommended');
+      });
+      
+      recommendedList.forEach(function(item) {
+        document.querySelectorAll('.team-btn').forEach(function(btn) {
+          if (btn.getAttribute('data-category') === item.category) {
+            btn.classList.add('recommended');
+          }
+        });
+      });
+    }
+    
+    function hideRecommendation() {
+      var box = document.getElementById('recommendationBox');
+      box.classList.remove('show');
+      recommendedCategory = null;
+      
+      document.querySelectorAll('.team-btn').forEach(function(btn) {
+        btn.classList.remove('recommended');
+      });
+    }
+    
+    function setMinDate() {
+      // Default: External mode
+      setMinDateExternal();
+    }
+    
+    function showMessage(text, type, duration) {
+      if (typeof duration === 'undefined') duration = 5000;
+      
+      var messageDiv = document.getElementById('message');
+      messageDiv.textContent = text;
+      messageDiv.className = 'message ' + type;
+      messageDiv.style.display = 'block';
+      
+      setTimeout(function() {
+        messageDiv.style.display = 'none';
+      }, duration);
+    }
+
+    // ⭐ Toast Notification System
+    function showToast(title, message, type, duration) {
+      if (typeof type === 'undefined') type = 'info';
+      if (typeof duration === 'undefined') duration = 5000;
+      
+      var container = document.getElementById('toastContainer');
+      if (!container) {
+        container = document.createElement('div');
+        container.id = 'toastContainer';
+        container.className = 'toast-container';
+        document.body.appendChild(container);
+      }
+      
+      var icons = {
+        success: '✅',
+        error: '❌',
+        warning: '⚠️',
+        info: 'ℹ️'
+      };
+      
+      var toast = document.createElement('div');
+      toast.className = 'toast ' + type;
+      toast.innerHTML = `
+        <div class="toast-icon">${icons[type] || 'ℹ️'}</div>
+        <div class="toast-content">
+          <div class="toast-title">${title}</div>
+          ${message ? '<div class="toast-message">' + message + '</div>' : ''}
+        </div>
+        <button class="toast-close" onclick="removeToast(this)">×</button>
+        <div class="toast-progress"></div>
+      `;
+      
+      container.appendChild(toast);
+      
+      var progress = toast.querySelector('.toast-progress');
+      var startTime = Date.now();
+      
+      var interval = setInterval(function() {
+        var elapsed = Date.now() - startTime;
+        var percentage = (elapsed / duration) * 100;
+        
+        if (percentage >= 100) {
+          clearInterval(interval);
+          removeToast(toast.querySelector('.toast-close'));
+        } else {
+          progress.style.width = (100 - percentage) + '%';
+        }
+      }, 50);
+      
+      toast._progressInterval = interval;
+    }
+    
+    function removeToast(closeBtn) {
+      var toast = closeBtn.parentElement || closeBtn;
+      if (toast._progressInterval) {
+        clearInterval(toast._progressInterval);
+      }
+      
+      toast.style.animation = 'slideOutRight 0.3s ease-out';
+      setTimeout(function() {
+        if (toast.parentElement) {
+          toast.parentElement.removeChild(toast);
+        }
+      }, 300);
+    }
+
+    // ⭐ Progress Bar in Submit Button
+    function updateSubmitProgress(step, totalSteps, stepText) {
+      var progressBar = document.getElementById('submitProgressBar');
+      var stepTextDiv = document.getElementById('submitStepText');
+      
+      if (!progressBar || !stepTextDiv) return;
+      
+      var percentage = (step / totalSteps) * 100;
+      progressBar.style.width = percentage + '%';
+      
+      if (stepText) {
+        stepTextDiv.textContent = '⏳ ' + stepText + ' (' + step + '/' + totalSteps + ')';
+        stepTextDiv.classList.add('show');
+      } else {
+        stepTextDiv.classList.remove('show');
+      }
+    }
+    
+    function resetSubmitProgress() {
+      var progressBar = document.getElementById('submitProgressBar');
+      var stepTextDiv = document.getElementById('submitStepText');
+      
+      if (progressBar) progressBar.style.width = '0%';
+      if (stepTextDiv) {
+        stepTextDiv.classList.remove('show');
+        stepTextDiv.textContent = '';
+      }
+    }
+    
+    document.getElementById('requestDate').addEventListener('change', updateAvailableSlots);
+    document.getElementById('startTime').addEventListener('change', updateEndTimeSlots);
+    document.getElementById('rfiForm').addEventListener('submit', handleSubmit);
+    
+    function updateAvailableSlots() {
+      var date = document.getElementById('requestDate').value;
+      var startTimeSelect = document.getElementById('startTime');
+      var endTimeSelect = document.getElementById('endTime');
+      
+      setSelectLoading(startTimeSelect, 'กำลังโหลดเวลาที่ว่าง...');
+      resetEndTimeSelect();
+      
+      if (date) {
+        var selectedDate = new Date(date + 'T00:00:00');
+        var today = new Date();
+        var todayDateOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        var selectedDateOnly = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate());
+        
+        // ⭐ Internal: อนุญาตให้จองวันนี้ได้ (ถ้าเหลือเวลา ≥30 นาที)
+        if (selectedInspectionType === 'internal') {
+          if (selectedDateOnly < todayDateOnly) {
+            startTimeSelect.className = startTimeSelect.className.replace(' loading-select', '');
+            startTimeSelect.innerHTML = '<option value="">-- กรุณาเลือกวันนี้หรือวันถัดไป --</option>';
+            startTimeSelect.disabled = true;
+            showMessage('Internal: ไม่สามารถเลือกวันในอดีตได้', 'warning');
+            return;
+          }
+        } else {
+          // External: ต้องเลือกพรุ่งนี้ขึ้นไป
+          if (selectedDateOnly <= todayDateOnly) {
+            startTimeSelect.className = startTimeSelect.className.replace(' loading-select', '');
+            startTimeSelect.innerHTML = '<option value="">-- กรุณาเลือกวันพรุ่งนี้เป็นต้นไป --</option>';
+            startTimeSelect.disabled = true;
+            showMessage('External: กรุณาเลือกวันพรุ่งนี้หรือวันถัดไป', 'warning');
+            return;
+          }
+          
+          // ตรวจสอบเวลา 13:00 น. สำหรับพรุ่งนี้
+          var tomorrow = new Date(todayDateOnly);
+          tomorrow.setDate(tomorrow.getDate() + 1);
+          var isTomorrow = selectedDateOnly.getTime() === tomorrow.getTime();
+          
+          if (isTomorrow) {
+            var currentHour = today.getHours();
+            
+            if (currentHour >= 13) {
+              startTimeSelect.className = startTimeSelect.className.replace(' loading-select', '');
+              startTimeSelect.innerHTML = '<option value="">-- เลยเวลาจองวันพรุ่งนี้แล้ว (ต้องจองก่อน 13:00 น.) --</option>';
+              startTimeSelect.disabled = true;
+              showMessage('❌ External: ไม่สามารถจองวันพรุ่งนี้ได้แล้ว (เลย 13:00 น.)', 'error');
+              return;
+            }
+            
+            if (currentHour >= 11 && currentHour < 13) {
+              var timeLeft = 13 - currentHour;
+              showMessage('⚠️ External: เหลือเวลาจองวันพรุ่งนี้อีก ' + timeLeft + ' ชั่วโมง', 'warning', 8000);
+            }
+          }
+        }
+        
+        google.script.run
+          .withSuccessHandler(function(availableSlots) {
+            startTimeSelect.className = startTimeSelect.className.replace(' loading-select', '');
+            startTimeSelect.innerHTML = '';
+            
+            // ⭐ Internal: กรองเวลาที่เหลือ ≥30 นาที
+            if (selectedInspectionType === 'internal' && selectedDateOnly.getTime() === todayDateOnly.getTime()) {
+              var now = new Date();
+              var minTime = new Date(now.getTime() + (30 * 60 * 1000)); // +30 นาที
+              
+              availableSlots = availableSlots.filter(function(slot) {
+                var slotTime = new Date(selectedDate);
+                var timeParts = slot.split(':');
+                slotTime.setHours(parseInt(timeParts[0]), parseInt(timeParts[1]), 0, 0);
+                return slotTime > minTime;
+              });
+            }
+            
+            if (!availableSlots || availableSlots.length === 0) {
+              startTimeSelect.innerHTML = '<option value="">-- ไม่มีเวลาว่าง --</option>';
+              startTimeSelect.disabled = true;
+              showMessage('ไม่มีเวลาว่างสำหรับวันที่ที่เลือก', 'warning');
+            } else {
+              startTimeSelect.innerHTML = '<option value="">-- เลือกเวลาเริ่มต้น --</option>';
+              
+              availableSlots.forEach(function(slot) {
+                var option = document.createElement('option');
+                option.value = slot;
+                option.textContent = slot + ' น.';
+                startTimeSelect.appendChild(option);
+              });
+              
+              startTimeSelect.disabled = false;
+            }
+          })
+          .withFailureHandler(function(error) {
+            startTimeSelect.className = startTimeSelect.className.replace(' loading-select', '');
+            startTimeSelect.innerHTML = '<option value="">-- เกิดข้อผิดพลาด --</option>';
+            startTimeSelect.disabled = true;
+            showMessage('เกิดข้อผิดพลาดในการโหลดเวลาที่ว่าง', 'error');
+          })
+          .getAvailableTimeSlots(date);
+      } else {
+        startTimeSelect.innerHTML = '<option value="">-- กรุณาเลือกวันที่ก่อน --</option>';
+        startTimeSelect.disabled = true;
+      }
+    }
+    
+    function updateEndTimeSlots() {
+  var date = document.getElementById('requestDate').value;
+  var startTime = document.getElementById('startTime').value;
+  var endTimeSelect = document.getElementById('endTime');
+  
+  if (!startTime) {
+    resetEndTimeSelect();
+    return;
+  }
+  
+  setSelectLoading(endTimeSelect, 'กำลังโหลดเวลาสิ้นสุด...');
+  
+  if (date && startTime) {
+    // ✅ ดึง Duration จาก Work Type Dropdown
+    var workTypeSelect = document.getElementById('workType');
+    var selectedOption = workTypeSelect.options[workTypeSelect.selectedIndex];
+    var duration = parseInt(selectedOption.getAttribute('data-duration')) || 60;
+    
+    var startParts = startTime.split(':');
+    var startHour = parseInt(startParts[0]);
+    var startMin = parseInt(startParts[1]);
+    
+    // ✅ คำนวณ End Time จาก Duration
+    var totalMinutes = (startHour * 60) + startMin + duration;
+    var endHour = Math.floor(totalMinutes / 60);
+    var endMin = totalMinutes % 60;
+    
+    var defaultEndTime = endHour.toString().padStart(2, '0') + ':' + 
+                        endMin.toString().padStart(2, '0');
+    
+    var category = selectedTeamCategory;
+    var workType = workTypeSelect.value;
+    
+    google.script.run
+      .withSuccessHandler(function(availableEndTimes) {
+        endTimeSelect.className = endTimeSelect.className.replace(' loading-select', '');
+        endTimeSelect.innerHTML = '';
+        
+        if (!availableEndTimes || availableEndTimes.length === 0) {
+          endTimeSelect.innerHTML = '<option value="">-- ไม่มีเวลาสิ้นสุดที่ว่าง --</option>';
+          endTimeSelect.disabled = true;
+          showMessage('ไม่มีเวลาสิ้นสุดที่เหมาะสม', 'warning');
+        } else {
+          endTimeSelect.innerHTML = '<option value="">-- เลือกเวลาสิ้นสุด --</option>';
+          
+          availableEndTimes.forEach(function(time) {
+            var option = document.createElement('option');
+            option.value = time;
+            option.textContent = time + ' น.';
+            if (time === defaultEndTime) {
+              option.selected = true;
+            }
+            endTimeSelect.appendChild(option);
+          });
+          
+          endTimeSelect.disabled = false;
+          
+          if (availableEndTimes.includes(defaultEndTime)) {
+            showMessage('✅ เลือกเวลาสิ้นสุดเริ่มต้น: ' + defaultEndTime + ' น. (' + duration + ' นาที)', 'info', 3000);
+          }
+        }
+      })
+      .withFailureHandler(function(error) {
+        endTimeSelect.className = endTimeSelect.className.replace(' loading-select', '');
+        endTimeSelect.innerHTML = '<option value="">-- เกิดข้อผิดพลาด --</option>';
+        endTimeSelect.disabled = true;
+        showMessage('เกิดข้อผิดพลาดในการโหลดเวลาสิ้นสุด', 'error');
+      })
+      .getAvailableEndTimes(date, startTime, category, workType); // ✅ ส่ง workType
+  }
+}
+    
+    function setSelectLoading(selectElement, loadingText) {
+      selectElement.innerHTML = '<option value="">' + loadingText + '</option>';
+      selectElement.className += ' loading-select';
+      selectElement.disabled = true;
+    }
+    
+function resetEndTimeSelect() {
+  var endTimeSelect = document.getElementById('endTime');
+  endTimeSelect.innerHTML = '<option value="">-- กรุณาเลือกเวลาเริ่มก่อน --</option>';
+  endTimeSelect.disabled = true;
+  endTimeSelect.value = '';
+}
+    
+    function handleSubmit(event) {
+  event.preventDefault();
+  setSubmittingFlag();
+  
+  // ⭐ FIX: เช็คจาก hidden input ด้วย
+  var inspectionTypeInput = document.getElementById('inspectionType').value;
+  
+  if (!inspectionTypeInput && !selectedInspectionType) {
+    showMessage('❌ กรุณาเลือกประเภทการตรวจ (Internal หรือ External) ก่อน', 'error');
+    // ⭐ เพิ่ม: scroll ขึ้นไปที่ปุ่ม
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    return;
+  }
+  
+  // ⭐ FIX: ใช้ค่าจาก input หรือ variable
+  var finalInspectionType = inspectionTypeInput || selectedInspectionType;
+  
+  if (!selectedTeamCategory) {
+    showMessage('❌ กรุณาเลือกทีมงานก่อน', 'error');
+    return;
+  }
+  
+  var email = document.getElementById('requesterEmail').value;
+  if (!email || email === 'กำลังโหลด...') {
+    showMessage('⚠️ กรุณารอจนกว่าระบบจะโหลดอีเมลเสร็จ', 'warning');
+    return;
+  }
+  
+  var submitBtn = document.getElementById('submitBtn');
+  var loading = document.querySelector('.loading');
+  
+  var formData = {
+    inspectionType: finalInspectionType,
+    teamCategory: selectedTeamCategory,
+    requestDate: document.getElementById('requestDate').value,
+    workType: document.getElementById('workType').value,
+    startTime: document.getElementById('startTime').value,
+    endTime: document.getElementById('endTime').value,
+    description: document.getElementById('description').value.trim(),
+    location: document.getElementById('location').value.trim(),
+    requesterName: document.getElementById('requesterName').value.trim(),
+    requesterEmail: email
+  };
+  
+  // ⭐ เพิ่ม: เช็คว่ามีไฟล์หรือไม่
+  var fileInput = document.getElementById('locationLayoutFile');
+  var file = fileInput.files[0];
+  
+  if (!file) {
+    showMessage('❌ กรุณาแนบไฟล์ Location Layout', 'error');
+    return;
+  }
+  
+  // ⭐ FIX: เช็คอีกครั้งว่ามี inspectionType หรือไม่
+  var requiredFields = ['inspectionType', 'teamCategory', 'requestDate', 'workType', 'startTime', 'endTime', 'description', 'location', 'requesterName', 'requesterEmail'];
+  var missingFields = requiredFields.filter(function(field) {
+    return !formData[field];
+  });
+  
+  if (missingFields.length > 0) {
+    var missingFieldNames = missingFields.map(function(field) {
+      var labels = {
+        inspectionType: 'ประเภทการตรวจ',
+        teamCategory: 'ทีมงาน',
+        requestDate: 'วันที่',
+        workType: 'ประเภทงาน',
+        startTime: 'เวลาเริ่ม',
+        endTime: 'เวลาสิ้นสุด',
+        description: 'รายละเอียด',
+        location: 'สถานที่',
+        requesterName: 'ชื่อผู้ขอ',
+        requesterEmail: 'อีเมล'
+      };
+      return labels[field] || field;
+    });
+    
+    showMessage('❌ กรุณากรอกข้อมูลให้ครบถ้วน:\n• ' + missingFieldNames.join('\n• '), 'error');
+    return;
+  }
+  
+  // ⭐ แสดง Confirmation Dialog
+  var confirmMsg = '✅ ยืนยันการบันทึก RFI Request?\n\n';
+  confirmMsg += '📋 ประเภท: ' + (finalInspectionType === 'internal' ? 'Internal Inspection' : 'External Inspection') + '\n';
+  confirmMsg += '🏷️ งาน: ' + formData.workType + '\n';
+  confirmMsg += '👥 ทีม: ' + formData.teamCategory + '\n';
+  confirmMsg += '📅 วันที่: ' + formData.requestDate + '\n';
+  confirmMsg += '⏰ เวลา: ' + formData.startTime + ' - ' + formData.endTime;
+  
+  if (!confirm(confirmMsg)) {
+    showMessage('ยกเลิกการบันทึก', 'info', 2000);
+    return;
+  }
+  
+  submitBtn.disabled = true;
+  loading.style.display = 'block';
+  
+  // ⭐ แปลงไฟล์เป็น Base64
+  var reader = new FileReader();
+  
+reader.onload = function(e) {
+    var base64Content = e.target.result.split(',')[1];
+    
+    formData.locationLayoutFile = {
+      name: file.name,
+      mimeType: file.type,
+      content: base64Content
+    };
+    
+    console.log('📤 Submitting with file:', file.name, '(' + formatFileSize(file.size) + ')');
+    
+    // ⭐ เริ่ม Progress Bar
+    var isInternal = finalInspectionType === 'internal';
+    var totalSteps = isInternal ? 6 : 5;
+    
+    showToast('กำลังประมวลผล', 'กำลังบันทึก RFI Request...', 'info', 3000);
+    updateSubmitProgress(1, totalSteps, 'ตรวจสอบข้อมูล');
+    
+    google.script.run
+.withSuccessHandler(function(result) {
+  loading.style.display = 'none';
+  submitBtn.disabled = false;
+  
+  console.log('📥 Response:', result);
+  
+  if (result && result.success) {
+    // ⭐ แสดง Progress ตามขั้นตอนที่ Backend ทำเสร็จ
+    if (result.progress) {
+      result.progress.forEach(function(step, index) {
+        setTimeout(function() {
+          updateSubmitProgress(index + 1, totalSteps, step);
+        }, index * 300);
+      });
+    }
+    
+    setTimeout(function() {
+      updateSubmitProgress(totalSteps, totalSteps, '✅ สำเร็จ');
+      
+      setTimeout(function() {
+        resetSubmitProgress();
+        
+        var successMsg = result.message || 'บันทึกสำเร็จ';
+        var toastMsg = '';
+        
+        if (result.fileUrl) {
+          toastMsg = 'บันทึกข้อมูลและไฟล์เรียบร้อย';
+        }
+        
+        showToast('✅ สำเร็จ!', toastMsg, 'success', 8000);
+        showMessage('✅ ' + successMsg, 'success', 10000);
+        resetFormChangeFlag();
+        
+        // ⭐⭐⭐ CRITICAL FIX: Reset Form และกลับไป Step 1 ⭐⭐⭐
+setTimeout(function() {
+  resetToStep1();
+}, 1000);
+        
+      }, 2000);
+      
+    }, result.progress ? result.progress.length * 300 : 0);
+    
+  } else {
+    resetSubmitProgress();
+    var errorMessage = result && result.message ? result.message : 'เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ';
+    showToast('❌ เกิดข้อผิดพลาด', errorMessage, 'error', 8000);
+    showMessage('❌ ' + errorMessage, 'error');
+  }
+})
+          
+
+      .withFailureHandler(function(error) {
+        loading.style.display = 'none';
+        submitBtn.disabled = false;
+        resetSubmitProgress();
+        isSubmitting = false;
+        
+        console.error('❌ Error:', error);
+        
+        var errorMessage = error.message || error.toString();
+        showToast('❌ เกิดข้อผิดพลาด', errorMessage, 'error', 8000);
+        showMessage('❌ เกิดข้อผิดพลาดในการบันทึก:\n' + errorMessage, 'error');
+      })
+      .saveRFIRequirement(formData);
+  };
+  
+  reader.onerror = function(error) {
+    loading.style.display = 'none';
+    submitBtn.disabled = false;
+    showMessage('❌ ไม่สามารถอ่านไฟล์ได้: ' + error.toString(), 'error');
+  };
+  
+  // ⭐ อ่านไฟล์เป็น Base64
+  reader.readAsDataURL(file);
+}
+    
+function resetForm() {
+  console.log('========== RESETTING FORM ==========');
+  
+  // ⭐ 1. Reset HTML Form
+  document.getElementById('rfiForm').reset();
+  
+  // ⭐ 2. Reset Inspection Type Buttons
+  var inspectionButtons = document.querySelectorAll('.inspection-btn');
+  inspectionButtons.forEach(function(btn) {
+    btn.classList.remove('active');
+  });
+  
+  document.getElementById('infoBoxExternal').classList.remove('show');
+  document.getElementById('infoBoxInternal').classList.remove('show');
+  
+  // ⭐ 3. Reset Inspection Type Variables
+  selectedInspectionType = null;
+  document.getElementById('inspectionType').value = '';
+  
+  // ⭐ 4. Reset Team Buttons
+  var teamButtons = document.querySelectorAll('.team-btn');
+  teamButtons.forEach(function(btn) {
+    btn.classList.remove('active');
+    btn.classList.remove('recommended'); // ⭐ เพิ่ม: ลบ class recommended
+  });
+  
+  document.getElementById('multiSelectContainer').classList.remove('show');
+  clearAllCheckboxes();
+  
+  // ⭐ 5. Reset Team Variables
+  selectedTeamCategory = null;
+  isMultiWork = false;
+  recommendedCategory = null; // ⭐ เพิ่ม: Reset recommended
+  document.getElementById('teamCategory').value = '';
+  hideRecommendation();
+  
+  // ⭐ 6. Reset Work Type Select
+  var workTypeSelect = document.getElementById('workType');
+  workTypeSelect.innerHTML = '<option value="">-- กำลังโหลดประเภทงาน... --</option>';
+  workTypeSelect.disabled = true;
+  workTypeSelect.value = '';
+  
+  // ⭐ 7. Reset Work Type Note
+  var workTypeNote = document.getElementById('workTypeNote');
+  if (workTypeNote) {
+    workTypeNote.style.display = 'none';
+    workTypeNote.innerHTML = '';
+  }
+  
+  // ⭐ 8. Reset Date Input
+  document.getElementById('requestDate').value = '';
+  
+  // ⭐ 9. Reset Time Slots
+  document.getElementById('startTime').innerHTML = '<option value="">-- กรุณาเลือกวันที่ก่อน --</option>';
+  document.getElementById('startTime').disabled = true;
+  document.getElementById('startTime').value = '';
+  resetEndTimeSelect();
+  
+  // ⭐ 10. Reset Text Inputs
+  document.getElementById('description').value = '';
+  document.getElementById('location').value = '';
+  
+  // ⭐ 11. Reset Location Layout File
+  var fileInput = document.getElementById('locationLayoutFile');
+  var fileInfo = document.getElementById('fileInfo');
+  var clearBtn = document.getElementById('clearFileBtn');
+  
+  fileInput.value = '';
+  fileInfo.style.display = 'none';
+  if (clearBtn) clearBtn.style.display = 'none';
+  
+  // ⭐ 12. Clear Summary (Step 5)
+  document.getElementById('summaryInspectionType').textContent = '-';
+  document.getElementById('summaryWorkType').textContent = '-';
+  document.getElementById('summaryTeam').textContent = '-';
+  document.getElementById('summaryDate').textContent = '-';
+  document.getElementById('summaryTime').textContent = '-';
+  document.getElementById('summaryLocation').textContent = '-';
+  document.getElementById('summaryDescription').textContent = '-';
+  document.getElementById('summaryFile').textContent = '-';
+  document.getElementById('summaryRequester').textContent = '-';
+  
+  // ⭐ 13. Reset Submit Button
+  var submitBtn = document.getElementById('submitBtn');
+  submitBtn.disabled = false;
+  submitBtn.textContent = 'ส่ง RFI Request';
+  
+  // ⭐ 14. Hide Loading
+  document.getElementById('loading').style.display = 'none';
+  
+  // ⭐ 15. Reload Master Data
+  loadWorkTypes();
+  loadUserEmailAndName();
+  setMinDate();
+  
+  // ⭐ 16. Reset Form Change Flag
+  resetFormChangeFlag();
+  
+  console.log('✅ Form reset complete - All fields cleared');
+  console.log('========================================');
+}
+
+/**
+ * ⭐ Reset Form และกลับไป Step 1
+ */
+function resetToStep1() {
+  console.log('🔄 Resetting to Step 1...');
+  
+  // 1. Reset Form
+  resetForm();
+  
+  // 2. Clear Completed Steps
+  completedSteps.clear();
+  
+  // 3. Go to Step 1
+  goToStep(1);
+  
+  // 4. Scroll to Top
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  
+  // 5. Show Info Message
+  setTimeout(function() {
+    showMessage('✅ พร้อมสำหรับ RFI Request ใหม่ - กรุณาเลือกประเภทการตรวจ', 'info', 5000);
+  }, 500);
+  
+  console.log('✅ Reset to Step 1 complete');
+}
+
+function setupHolidayCheck() {
+  var dateInput = document.getElementById('requestDate');
+  
+  dateInput.addEventListener('change', function() {
+    var selectedDate = this.value;
+    var inspectionType = document.getElementById('inspectionType').value;
+    
+    if (selectedDate && inspectionType) {
+      checkHolidayRestrictions(selectedDate, inspectionType);
+    }
+  });
+}
+
+function checkHolidayRestrictions(dateStr, inspectionType) {
+  if (!dateStr || !inspectionType) return;
+  
+  console.log('🔍 Checking holiday restrictions:', dateStr);
+  
+  showToast('กำลังตรวจสอบ', 'กำลังเช็ควันหยุด...', 'info', 2000);
+  
+  google.script.run
+    .withSuccessHandler(function(result) {
+      console.log('📥 Holiday check result:', result);
+      
+      if (!result.allowed) {
+        // ⭐ FIX: ถ้าวันที่ตรงกับวันที่แนะนำ → อนุญาต
+        var selectedDate = document.getElementById('requestDate').value;
+        if (result.nextWorkday && selectedDate === result.nextWorkday) {
+          console.log('✅ Selected date matches recommended date, allowing');
+          return; // ออกจาก function
+        }
+        
+        // ❌ ไม่สามารถจองได้
+        console.log('❌ Cannot book:', result.reason);
+        
+        showToast(
+          result.title || '❌ ไม่สามารถจองวันนี้ได้',
+          result.message,
+          'error',
+          12000
+        );
+        
+        showMessage(result.message, 'error', 12000);
+        
+        // ล้างค่าวันที่
+        document.getElementById('requestDate').value = '';
+        
+        // Reset Time Slots
+        document.getElementById('startTime').innerHTML = '<option value="">-- กรุณาเลือกวันที่ก่อน --</option>';
+        document.getElementById('startTime').disabled = true;
+        resetEndTimeSelect();
+        
+      } else if (result.warning) {
+        // ⚠️ มีคำเตือน (แต่จองได้)
+        console.log('⚠️ Warning:', result.message);
+        
+        showToast(
+          result.title || '⚠️ คำเตือน',
+          result.message,
+          'warning',
+          10000
+        );
+        
+      } else {
+        // ✅ จองได้ปกติ
+        console.log('✅ Date is available for booking');
+      }
+    })
+    .withFailureHandler(function(error) {
+      console.error('❌ Error checking holiday:', error);
+      showToast(
+        '⚠️ เกิดข้อผิดพลาด',
+        'ไม่สามารถตรวจสอบวันหยุดได้: ' + error.message,
+        'error',
+        5000
+      );
+    })
+    .checkDateBookingAllowed(dateStr, inspectionType);
+}
+
+var originalOnLoad = window.onload;
+window.onload = function() {
+  if (originalOnLoad) originalOnLoad();
+  
+  // Initialize Progressive Form
+  initProgressiveForm();
+  
+  // ⭐ เพิ่มบรรทัดนี้
+  setupHolidayCheck();
+  
+  console.log('✅ Progressive Form initialized');
+};
+
+// ⭐ แก้ไขฟังก์ชัน updateAvailableSlots ให้เช็ควันหยุดก่อน
+var originalUpdateAvailableSlots = updateAvailableSlots;
+
+updateAvailableSlots = function() {
+  var date = document.getElementById('requestDate').value;
+  var inspectionType = document.getElementById('inspectionType').value;
+  
+  if (!date || !inspectionType) {
+    originalUpdateAvailableSlots();
+    return;
+  }
+  
+  // ⭐ FIX: ไม่เช็ควันหยุดซ้ำ - ให้ checkHolidayRestrictions() จัดการเองตอนเลือกวันที่
+  // แค่ load time slots ไปเลย
+  originalUpdateAvailableSlots();
+}
+
+/**
+ * ⭐ เช็ควันหยุดอัตโนมัติเมื่อโหลดหน้าเว็บ
+ */
+function checkTodayHolidayStatus() {
+  console.log('🔍 Checking today holiday status...');
+  
+  google.script.run
+    .withSuccessHandler(function(holidays) {
+      if (!holidays || holidays.length === 0) {
+        console.log('✅ No holidays data');
+        return;
+      }
+      
+      var now = new Date();
+      var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      var currentHour = now.getHours();
+      
+      // 🔍 หาวันหยุดพรุ่งนี้
+      var tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      var tomorrowStr = formatDateYYYYMMDD(tomorrow);
+      
+      var tomorrowHoliday = null;
+      var consecutiveDays = 0;
+      
+      holidays.forEach(function(holiday) {
+        if (holiday.date === tomorrowStr) {
+          tomorrowHoliday = holiday;
+        }
+      });
+      
+      // 📊 นับวันหยุดติดต่อกัน
+      if (tomorrowHoliday) {
+        var checkDate = new Date(tomorrow);
+        
+        while (true) {
+          var checkDateStr = formatDateYYYYMMDD(checkDate);
+          var isHoliday = holidays.some(function(h) {
+            return h.date === checkDateStr;
+          });
+          
+          if (isHoliday) {
+            consecutiveDays++;
+            checkDate.setDate(checkDate.getDate() + 1);
+          } else {
+            break;
+          }
+        }
+      }
+      
+      // 🔍 หาวันหยุดวันนี้
+      var todayStr = formatDateYYYYMMDD(today);
+      var todayHoliday = null;
+      
+      holidays.forEach(function(holiday) {
+        if (holiday.date === todayStr) {
+          todayHoliday = holiday;
+        }
+      });
+      
+      // ========================================
+      // ⭐ กรณีที่ 1: วันนี้เป็นวันหยุด
+      // ========================================
+      if (todayHoliday) {
+        var holidayMsg = '';
+        var holidayType = 'info';
+        
+        if (currentHour < 13) {
+          holidayMsg = '📋 External: ไม่สามารถจองได้ในช่วง 00:00-13:00 น.\n' +
+                      '🏢 Internal: ไม่สามารถจองได้ตลอดทั้งวัน\n\n' +
+                      '💡 รอจนถึง 13:00 น. เพื่อจองวันทำการถัดไป (External เท่านั้น)';
+          holidayType = 'warning';
+        } else {
+          holidayMsg = '📋 External: สามารถจองวันทำการถัดไปได้แล้ว (Lead Time +2 วัน)\n' +
+                      '🏢 Internal: ไม่สามารถจองได้';
+          holidayType = 'info';
+        }
+        
+        showToast(
+          '🎉 วันนี้เป็นวันหยุด: ' + todayHoliday.name,
+          holidayMsg,
+          holidayType,
+          15000
+        );
+        
+        return;
+      }
+      
+      // ========================================
+      // ⭐ กรณีที่ 2: พรุ่งนี้เป็นวันหยุด (วันก่อนหยุด)
+      // ========================================
+      if (tomorrowHoliday) {
+        var warningMsg = '';
+        var warningType = 'warning';
+        var warningTitle = '⚠️ พรุ่งนี้เป็นวันหยุด!';
+        
+        // 🏢 Internal: จองวันหยุดได้ แต่ต้องจองก่อน 13:00 น.
+        if (currentHour < 13) {
+          warningMsg = '📅 พรุ่งนี้: ' + tomorrowHoliday.name;
+          
+          if (consecutiveDays > 1) {
+            warningMsg += ' (หยุดติดต่อกัน ' + consecutiveDays + ' วัน)';
+          }
+          
+          warningMsg += '\n\n' +
+                       '🏢 Internal Inspection:\n' +
+                       '✅ ยังจองวันหยุดได้! แต่ต้องจองก่อน 13:00 น.\n' +
+                       '⏳ เหลือเวลาอีก ' + (13 - currentHour) + ' ชั่วโมง ' + (60 - now.getMinutes()) + ' นาที\n\n' +
+                       '📋 External Inspection:\n' +
+                       '⚠️ ห้ามจองวันหยุด และต้องจองก่อน 13:00 น.';
+          
+          warningType = 'warning';
+          warningTitle = '⏰ พรุ่งนี้เป็นวันหยุด - รีบจอง!';
+          
+        } else {
+          // หลัง 13:00 น. แล้ว
+          warningMsg = '📅 พรุ่งนี้: ' + tomorrowHoliday.name;
+          
+          if (consecutiveDays > 1) {
+            warningMsg += ' (หยุดติดต่อกัน ' + consecutiveDays + ' วัน)';
+          }
+          
+          warningMsg += '\n\n' +
+                       '❌ เลยเวลาจองแล้ว (ต้องจองก่อน 13:00 น.)\n\n' +
+                       '🏢 Internal: ห้ามจองวันหยุด\n' +
+                       '📋 External: ห้ามจองจนถึงวันทำการถัดไป';
+          
+          warningType = 'error';
+          warningTitle = '❌ เลยเวลาจองวันหยุดแล้ว';
+        }
+        
+        showToast(
+          warningTitle,
+          warningMsg,
+          warningType,
+          20000 // แสดง 20 วินาที
+        );
+      }
+      
+    })
+    .withFailureHandler(function(error) {
+      console.error('❌ Error checking holiday status:', error);
+    })
+    .getHolidayList();
+}
+
+/**
+ * ⭐ Helper: แปลง Date เป็น YYYY-MM-DD
+ */
+function formatDateYYYYMMDD(date) {
+  var year = date.getFullYear();
+  var month = String(date.getMonth() + 1).padStart(2, '0');
+  var day = String(date.getDate()).padStart(2, '0');
+  return year + '-' + month + '-' + day;
+}
+  </script>
+</body>
+</html>
