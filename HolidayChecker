@@ -1,0 +1,340 @@
+/**
+ * ========================================
+ * HOLIDAY MANAGEMENT SYSTEM (CACHED + CONSECUTIVE LOGIC)
+ * ========================================
+ * ระบบจัดการวันหยุด - พร้อม Cache Service
+ * 🔧 UPDATED: รองรับเงื่อนไขวันหยุดติดต่อกัน (Consecutive Holidays)
+ * ต้องจองก่อน 13:00 น. ของ "วันทำการล่าสุด"
+ */
+
+const HOLIDAY_CACHE_KEY = 'master_holidays_data';
+const HOLIDAY_CACHE_TTL = 21600; 
+
+// ... (ส่วน Cache Function คงเดิม) ...
+
+function getActiveHolidays() {
+  try {
+    const cache = CacheService.getScriptCache();
+    const cachedJson = cache.get(HOLIDAY_CACHE_KEY);
+    
+    if (cachedJson) {
+      const holidays = JSON.parse(cachedJson);
+      return holidays.map(function(h) {
+        return {
+          date: h.date,
+          name: h.name,
+          dateObj: new Date(h.date + 'T00:00:00')
+        };
+      });
+    }
+    return loadHolidaysFromSheet();
+  } catch (error) {
+    console.error('❌ Error in getActiveHolidays:', error);
+    return loadHolidaysFromSheet();
+  }
+}
+
+function loadHolidaysFromSheet() {
+  try {
+    console.log('📥 Reading from Holiday Sheet...');
+    const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName('Holiday');
+    if (!sheet) return [];
+    
+    const lastRow = sheet.getLastRow();
+    if (lastRow <= 1) return [];
+    
+    const data = sheet.getRange(2, 1, lastRow - 1, 3).getValues();
+    const holidays = [];
+    
+    for (let i = 0; i < data.length; i++) {
+      const row = data[i];
+      const date = row[0];
+      const name = String(row[1] || '').trim();
+      const status = String(row[2] || '').trim();
+      
+      if (status !== 'Active' && status !== 'Activated') continue;
+      
+      if (date && date instanceof Date) {
+        holidays.push({
+          date: formatDate(date),
+          name: name
+        });
+      }
+    }
+    
+    holidays.sort(function(a, b) {
+      return new Date(a.date).getTime() - new Date(b.date).getTime();
+    });
+    
+    const cache = CacheService.getScriptCache();
+    const jsonData = JSON.stringify(holidays);
+    cache.put(HOLIDAY_CACHE_KEY, jsonData, HOLIDAY_CACHE_TTL);
+    
+    if (typeof addToCacheRegistry === 'function') {
+      addToCacheRegistry(HOLIDAY_CACHE_KEY, jsonData.length, HOLIDAY_CACHE_TTL);
+    }
+    
+    return holidays.map(function(h) {
+      return {
+        date: h.date,
+        name: h.name,
+        dateObj: new Date(h.date + 'T00:00:00')
+      };
+    });
+    
+  } catch (error) {
+    console.error('❌ Error loading holidays:', error);
+    return [];
+  }
+}
+
+function refreshHolidayCache() {
+  try {
+    const cache = CacheService.getScriptCache();
+    cache.remove(HOLIDAY_CACHE_KEY);
+    const holidays = loadHolidaysFromSheet();
+    return { success: true, count: holidays.length };
+  } catch (error) {
+    return { success: false, error: error.toString() };
+  }
+}
+
+function adminRefreshHolidays() {
+  const ui = SpreadsheetApp.getUi();
+  const result = refreshHolidayCache();
+  if (result.success) {
+    ui.alert('สำเร็จ ✅', 'อัปเดตข้อมูลวันหยุดแล้ว (' + result.count + ' วัน)', ui.ButtonSet.OK);
+  } else {
+    ui.alert('ผิดพลาด ❌', result.error, ui.ButtonSet.OK);
+  }
+}
+
+function autoRefreshHolidayCache() {
+  console.log('⏰ Trigger: Refreshing Holiday Cache...');
+  refreshHolidayCache();
+}
+
+// ========================================
+// 🧩 BUSINESS LOGIC HELPER FUNCTIONS
+// ========================================
+
+function isHoliday(dateStr) {
+  const holidays = getActiveHolidays();
+  for (let i = 0; i < holidays.length; i++) {
+    if (holidays[i].date === dateStr) return holidays[i];
+  }
+  return null;
+}
+
+/**
+ * ⭐ [NEW] หาวันทำการล่าสุด ก่อนวันที่กำหนด (ย้อนหลังข้ามวันหยุด)
+ * ใช้สำหรับหา Deadline ในการจอง
+ */
+function getDeadlineWorkday(targetDateStr) {
+  let checkDate = new Date(targetDateStr + 'T00:00:00');
+  checkDate.setDate(checkDate.getDate() - 1); // เริ่มเช็คจากเมื่อวาน
+  
+  // วนลูปย้อนกลับจนกว่าจะเจอวันที่ไม่ใช่วันหยุด
+  while (true) {
+    const dateStr = formatDate(checkDate);
+    if (!isHoliday(dateStr)) {
+      return {
+        date: dateStr,
+        dateObj: new Date(checkDate),
+        dateThai: formatDateThai(dateStr)
+      };
+    }
+    checkDate.setDate(checkDate.getDate() - 1); // ถอยหลังไปอีก 1 วัน
+  }
+}
+
+function getNextHoliday(fromDateStr) {
+  const holidays = getActiveHolidays();
+  const fromDate = new Date(fromDateStr + 'T00:00:00');
+  for (let i = 0; i < holidays.length; i++) {
+    if (holidays[i].dateObj > fromDate) return holidays[i];
+  }
+  return null;
+}
+
+function getConsecutiveHolidayCount(startDateStr) {
+  const holidays = getActiveHolidays();
+  const holidayDates = holidays.map(h => h.date);
+  let count = 0;
+  let checkDate = new Date(startDateStr + 'T00:00:00');
+  while (true) {
+    const dateStr = formatDate(checkDate);
+    if (holidayDates.indexOf(dateStr) !== -1) {
+      count++;
+      checkDate.setDate(checkDate.getDate() + 1);
+    } else {
+      break;
+    }
+  }
+  return count;
+}
+
+function getNextWorkday(fromDateStr) {
+  const holidays = getActiveHolidays();
+  const holidayDates = holidays.map(h => h.date);
+  let checkDate = new Date(fromDateStr + 'T00:00:00');
+  checkDate.setDate(checkDate.getDate() + 1);
+  let daysChecked = 0;
+  while (daysChecked < 30) {
+    const dateStr = formatDate(checkDate);
+    if (holidayDates.indexOf(dateStr) === -1) {
+      const dayOfWeek = checkDate.getDay();
+      const dayName = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'][dayOfWeek];
+      return {
+        date: dateStr,
+        dateThai: formatDateThai(dateStr),
+        dayName: dayName,
+        suggest: 'วัน' + dayName + 'ที่ ' + formatDateThai(dateStr)
+      };
+    }
+    checkDate.setDate(checkDate.getDate() + 1);
+    daysChecked++;
+  }
+  return { date: formatDate(checkDate), dateThai: formatDateThai(formatDate(checkDate)), suggest: 'ติดต่อทีม QC' };
+}
+
+
+/**
+ * ⭐ MAIN: ตรวจสอบว่าสามารถจองวันที่ได้หรือไม่ (Fixed for External Skip Logic)
+ */
+function canBookDate(targetDateStr, inspectionType) {
+  try {
+    console.log('Checking:', targetDateStr, '| Type:', inspectionType);
+    
+    const now = new Date();
+    const currentHour = now.getHours();
+    const currentMinute = now.getMinutes();
+    const today = formatDate(now);
+    const todayDateObj = new Date(today + 'T00:00:00');
+    const targetDateObj = new Date(targetDateStr + 'T00:00:00');
+
+    // 1. เช็คว่าเป็นวันหยุดหรือไม่
+    const targetHoliday = isHoliday(targetDateStr);
+
+    if (targetHoliday) {
+      // ... (Logic ส่วน Internal/Survey จองวันหยุด คงเดิม ไม่เปลี่ยนแปลง) ...
+      if (inspectionType === 'internal' || inspectionType === 'survey') {
+        const holidayToday = isHoliday(today);
+        if (holidayToday) {
+           const nextWorkday = getNextWorkday(today);
+           return { allowed: false, reason: 'today_holiday', title: '🎉 วันนี้เป็นวันหยุด', message: 'วันนี้วันหยุด ไม่สามารถทำรายการได้', nextWorkday: nextWorkday.date };
+        }
+        const deadlineWorkday = getDeadlineWorkday(targetDateStr);
+        if (today === deadlineWorkday.date) {
+          if (currentHour >= 13) {
+            const nextWorkday = getNextWorkday(targetDateStr);
+            return { allowed: false, reason: 'too_late_deadline', title: '⏰ เลยเวลาจองวันหยุด', message: 'ต้องจองก่อน 13:00 น. ของวันทำการล่าสุด', nextWorkday: nextWorkday.date };
+          }
+          return { allowed: true, warning: true, title: '✅ จองวันหยุดได้', message: '⏰ จองทันเวลา (ก่อน 13:00 น.) ✓' };
+        } else if (todayDateObj > deadlineWorkday.dateObj) {
+          const nextWorkday = getNextWorkday(targetDateStr);
+          return { allowed: false, reason: 'passed_deadline', title: '❌ ไม่สามารถจองได้', message: 'เลยกำหนดเวลาจองแล้ว', nextWorkday: nextWorkday.date };
+        }
+        return { allowed: true, warning: true, title: '✅ จองวันหยุดล่วงหน้า', message: '⏰ จองล่วงหน้า ✓' };
+      } else {
+        // External ห้ามจองวันหยุด
+        const nextWorkday = getNextWorkday(targetDateStr);
+        return { allowed: false, reason: 'target_is_holiday', title: '❌ วันที่เลือกเป็นวันหยุด (External)', message: '🚫 External ห้ามจองในวันหยุด\n💡 แนะนำ: จอง ' + nextWorkday.suggest, nextWorkday: nextWorkday.date };
+      }
+    }
+
+    // ----------------------------------------
+    // ✅ กรณีเลือกวันทำการปกติ (Common Days)
+    // ----------------------------------------
+    
+    if (inspectionType === 'internal' || inspectionType === 'survey') {
+      // ... (Logic Internal/Survey เดิม คงเดิม) ...
+      if (targetDateStr === today) {
+        if (currentHour >= 16) {
+          const nextWorkday = getNextWorkday(today);
+          return { allowed: false, reason: 'same_day_cutoff', title: '⏰ เลยเวลาจองวันนี้', message: 'ต้องจองก่อน 16:00 น.', nextWorkday: nextWorkday.date };
+        }
+        return { allowed: true, warning: true, title: '✅ จองวันนี้ได้', message: '⏰ จองก่อน 16:00 น. ✓' };
+      }
+      return { allowed: true };
+
+    } else {
+      // ========================================
+      // 🤝 EXTERNAL LOGIC (FIXED for 13:00 Rule)
+      // ========================================
+      
+      // 1. หาวันทำการถัดไป (Next Workday) จากวันนี้
+      const nextWorkdayInfo = getNextWorkday(today); // เช่น วันนี้ 24 -> ได้ 27 (ข้าม 25,26)
+      const nextWorkdayStr = nextWorkdayInfo.date;
+      
+      // 2. กำหนด "วันที่จองได้เร็วที่สุด" (Earliest Allowed Date)
+      let earliestAllowedDateStr = nextWorkdayStr;
+      let reasonMsg = '';
+
+      // เช็คเงื่อนไข Cutoff 13:00 น. หรือ วันนี้เป็นวันหยุด
+      const isTodayHoliday = isHoliday(today);
+      
+      if (isTodayHoliday || currentHour >= 13) {
+        // ถ้าวันนี้หยุด หรือ วันนี้เลย 13:00 น. -> ต้องข้ามวันทำการถัดไปไปอีก 1 วัน
+        // (เช่น วันนี้ 24 เกินบ่ายโมง -> 27 ไม่ทัน -> ต้องไป 28)
+        const dayAfterNextInfo = getNextWorkday(nextWorkdayStr);
+        earliestAllowedDateStr = dayAfterNextInfo.date;
+        
+        if (isTodayHoliday) {
+          reasonMsg = 'วันนี้เป็นวันหยุด เริ่มนับ Lead Time จากวันทำการถัดไป';
+        } else {
+          reasonMsg = 'ทำรายการหลัง 13:00 น. ไม่สามารถจองวันทำการถัดไปได้ทัน';
+        }
+      }
+
+      // 3. เปรียบเทียบวันที่เลือก กับ วันที่อนุญาต
+      // แปลงเป็น Date Object เพื่อเปรียบเทียบ
+      const targetObj = new Date(targetDateStr + 'T00:00:00');
+      const earliestObj = new Date(earliestAllowedDateStr + 'T00:00:00');
+
+      if (targetObj < earliestObj) {
+        // ❌ วันที่เลือก < วันที่อนุญาต (เช่น เลือก 27 แต่อนุญาตเริ่ม 28)
+        const suggestInfo = (earliestAllowedDateStr === nextWorkdayInfo.date) ? nextWorkdayInfo : getNextWorkday(nextWorkdayStr); // หา info ของวันที่แนะนำ
+        
+        return {
+          allowed: false,
+          reason: 'external_cutoff_rule',
+          title: '⏰ จองไม่ทันรอบ (External)',
+          message: '❌ ' + reasonMsg + '\n' +
+                   '⏰ เวลาปัจจุบัน: ' + currentHour + ':' + String(currentMinute).padStart(2, '0') + ' น.\n' +
+                   '📋 External Lead Time: ต้องจองล่วงหน้าและก่อน 13:00 น.\n\n' +
+                   '💡 แนะนำ: จอง ' + formatDateThai(earliestAllowedDateStr) + ' เป็นต้นไป',
+          nextWorkday: earliestAllowedDateStr,
+          canBookFromThai: formatDateThai(earliestAllowedDateStr)
+        };
+      }
+      
+      // ✅ ผ่านทุกเงื่อนไข
+      return { allowed: true };
+    }
+
+  } catch (error) {
+    console.error('❌ Error checking booking:', error);
+    return { allowed: true, error: error.toString() };
+  }
+}
+
+// Helper Date Functions
+function formatDate(date) {
+  if (!date) return '';
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return year + '-' + month + '-' + day;
+}
+
+function formatDateThai(dateString) {
+  if (!dateString) return '';
+  const months = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
+    'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+  const date = new Date(dateString + 'T00:00:00');
+  const day = date.getDate();
+  const month = months[date.getMonth()];
+  const year = date.getFullYear() + 543;
+  return day + ' ' + month + ' ' + year;
+}
